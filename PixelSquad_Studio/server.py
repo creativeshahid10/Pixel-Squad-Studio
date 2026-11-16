@@ -10,7 +10,7 @@ import glob
 import time
 import tempfile
 from pathlib import Path
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict, Any, Set
 
 # Ensure project root is in sys.path
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -39,7 +39,11 @@ UPLOADS_DIR = os.path.join(OUTPUTS_DIR, "uploads")
 os.makedirs(UPLOADS_DIR, exist_ok=True)
 
 # Global dictionary to track in-flight tasks and their user parameters
-PENDING_TASKS = {}
+PENDING_TASKS: Dict[str, Dict[str, Any]] = {}
+# Completed tasks cache to instantly respond on subsequent polls without re-processing
+COMPLETED_TASKS: Dict[str, Dict[str, Any]] = {}
+# Active mastering jobs to prevent concurrent duplicate mastering runs for the same task
+MASTERING_IN_PROGRESS: Set[str] = set()
 
 class SunoGeneratePayload(BaseModel):
     title: Optional[str] = "Untitled Song"
@@ -166,6 +170,11 @@ async def get_tracks():
             base_dir = os.path.dirname(jf)
             base_name = os.path.splitext(os.path.basename(jf))[0]
             
+            # Enforce strict deduplication by track_id
+            if base_name in seen_ids:
+                continue
+            seen_ids.add(base_name)
+            
             # Find matching audio file
             audio_path = None
             for ext in [".mp3", ".wav", ".flac"]:
@@ -200,7 +209,6 @@ async def get_tracks():
             mtime = os.path.getmtime(audio_path)
             created_str = time.strftime("%b %d, %I:%M %p", time.localtime(mtime))
             
-            seen_ids.add(base_name)
             tracks.append({
                 "id": base_name,
                 "title": title,
@@ -295,34 +303,34 @@ async def generate_track(payload: SunoGeneratePayload, request: Request):
     if payload.duration_mode == "auto":
         lines = [ln.strip() for ln in lyrics_text.split("\n") if ln.strip() and not ln.strip().startswith("[")]
         if len(lines) > 20:
-            calc_duration = 180.0
+            calc_duration = 90.0  # Capped at 90s in auto for fast response; use Custom slider for 120s-240s
         elif len(lines) > 10:
-            calc_duration = 120.0
+            calc_duration = 75.0
         elif len(lines) > 3:
-            calc_duration = 90.0
+            calc_duration = 60.0
         else:
             calc_duration = 60.0
 
     # 3. Model Tuning (v6-mini vs v6-wild vs v6-pro) & Max Mode
     model_choice = payload.model or "v6-mini"
     if model_choice == "v6-pro":
-        # Suno v6 Pro: Studio Master (20 steps, 7.8 CFG, 3.0 Shift)
-        inf_steps = payload.inference_steps or 20
+        # Suno v6 Pro: Studio Master (8 turbo steps max, 7.8 CFG, 3.0 Shift)
+        inf_steps = min(payload.inference_steps or 8, 8)
         cfg_scale = payload.guidance_scale or 7.8
         timestep_shift = payload.shift or 3.0
     elif model_choice == "v6-wild":
-        # Suno v6-wild: Experimental creative ideas (14 steps, 6.5 CFG, 4.5 Shift)
-        inf_steps = payload.inference_steps or 14
+        # Suno v6-wild: Experimental creative ideas (6 steps, 6.5 CFG, 4.5 Shift)
+        inf_steps = min(payload.inference_steps or 6, 8)
         cfg_scale = payload.guidance_scale or 6.5
         timestep_shift = payload.shift or 4.5
     else:
-        # Suno v6-mini: Fast, efficient (10 steps, 7.0 CFG, 3.0 Shift)
-        inf_steps = payload.inference_steps or 10
+        # Suno v6-mini: Ultra-fast, responsive (4 steps, 7.0 CFG, 3.0 Shift)
+        inf_steps = min(payload.inference_steps or 4, 8)
         cfg_scale = payload.guidance_scale or 7.0
         timestep_shift = payload.shift or 3.0
 
     if payload.max_mode:
-        inf_steps = max(inf_steps, 24)
+        inf_steps = 8
 
     # 4. Style Influence (maps 0%..100% to Guidance Scale 2.5..13.0)
     if payload.style_influence is not None and not payload.guidance_scale:
@@ -419,6 +427,38 @@ async def check_track_status(task_id: str):
     """Poll job status and progress for a generation task."""
     import httpx
     import urllib.parse
+
+    # 1. Fast cache hit if already completed
+    if task_id in COMPLETED_TASKS:
+        return COMPLETED_TASKS[task_id]
+
+    # 2. Check if already mastered on disk
+    existing_json = glob.glob(os.path.join(OUTPUTS_DIR, "**", f"{task_id}.json"), recursive=True)
+    if existing_json:
+        jf = existing_json[0]
+        base_dir = os.path.dirname(jf)
+        dest_audio = os.path.join(base_dir, f"{task_id}.mp3")
+        if os.path.exists(dest_audio):
+            resp = {
+                "status": "success",
+                "stage": "Generation & Mastering Complete",
+                "progress": 100,
+                "audio_url": f"/api/audio-file?path={os.path.abspath(dest_audio)}",
+                "result": []
+            }
+            COMPLETED_TASKS[task_id] = resp
+            return resp
+
+    # 3. Check if mastering is currently running for this task
+    if task_id in MASTERING_IN_PROGRESS:
+        return {
+            "status": "processing",
+            "stage": "Mastering broadcast audio (EQ, Stereo Widening, Loudness)...",
+            "progress": 95,
+            "audio_url": None,
+            "result": []
+        }
+
     async with httpx.AsyncClient(base_url="http://127.0.0.1:7865", timeout=30.0) as client:
         response = await client.post("/query_result", json={"task_id_list": [task_id]})
     
@@ -470,51 +510,73 @@ async def check_track_status(task_id: str):
             file_path = raw_path
 
         if file_path and os.path.exists(file_path):
-            # Save into gradio_outputs for persistent indexing
-            batch_dir = os.path.join(OUTPUTS_DIR, f"batch_{int(time.time())}")
-            os.makedirs(batch_dir, exist_ok=True)
-            dest_audio = os.path.join(batch_dir, f"{task_id}.mp3")
-            dest_json = os.path.join(batch_dir, f"{task_id}.json")
-            
-            meta = PENDING_TASKS.get(task_id, {})
-            preset = meta.get("mastering_preset") or "suno_studio"
+            if task_id in MASTERING_IN_PROGRESS:
+                return {
+                    "status": "processing",
+                    "stage": "Mastering broadcast audio (EQ, Stereo Widening, Loudness)...",
+                    "progress": 95,
+                    "audio_url": None,
+                    "result": []
+                }
 
-            if not os.path.exists(dest_audio):
-                try:
-                    # Apply Suno-grade Studio Mastering (Multi-band EQ, Stereo Widening, Glue Bus Compression, True-Peak -11 LUFS Normalization, 320k MP3)
-                    master_audio_file(
-                        input_path=file_path,
-                        output_path=dest_audio,
-                        preset=preset,
-                        bitrate="320k",
-                        sample_rate=48000
-                    )
-                except Exception as me:
-                    logger.warning(f"Mastering failed, falling back to direct copy: {me}")
-                    shutil.copyfile(file_path, dest_audio)
+            MASTERING_IN_PROGRESS.add(task_id)
+            try:
+                # Deterministic batch dir for this specific task
+                batch_dir = os.path.join(OUTPUTS_DIR, f"batch_{task_id[:12]}")
+                os.makedirs(batch_dir, exist_ok=True)
+                dest_audio = os.path.join(batch_dir, f"{task_id}.mp3")
+                dest_json = os.path.join(batch_dir, f"{task_id}.json")
+                
+                meta = PENDING_TASKS.get(task_id, {})
+                preset = meta.get("mastering_preset") or "suno_studio"
 
-            meta_payload = {
-                "title": meta.get("title") or first_item.get("metas", {}).get("title") or "PixelSquad Song",
-                "caption": meta.get("style", "") or first_item.get("prompt", ""),
-                "lyrics": meta.get("lyrics", "") or first_item.get("lyrics", ""),
-                "instrumental": meta.get("instrumental", False),
-                "duration": meta.get("duration", 60.0),
-                "bpm": meta.get("bpm"),
-                "keyscale": meta.get("key_scale"),
-                "vocal_gender": meta.get("vocal_gender"),
-                "voice_artist": meta.get("voice_artist"),
-                "mastered": True,
-                "mastering_preset": preset,
-                "bitrate": "320k",
-                "sample_rate": 48000,
-                "lufs": -11.0,
-                "model": meta.get("model", "v6-mini"),
-                "created_at": time.strftime("%Y-%m-%d %H:%M:%S")
-            }
-            with open(dest_json, "w", encoding="utf-8") as f:
-                json.dump(meta_payload, f, ensure_ascii=False, indent=2)
+                if not os.path.exists(dest_audio):
+                    try:
+                        # Apply Suno-grade Studio Mastering (Multi-band EQ, Stereo Widening, Glue Bus Compression, True-Peak -11 LUFS Normalization, 320k MP3)
+                        master_audio_file(
+                            input_path=file_path,
+                            output_path=dest_audio,
+                            preset=preset,
+                            bitrate="320k",
+                            sample_rate=48000
+                        )
+                    except Exception as me:
+                        logger.warning(f"Mastering failed, falling back to direct copy: {me}")
+                        shutil.copyfile(file_path, dest_audio)
 
-            audio_url = f"/api/audio-file?path={os.path.abspath(dest_audio)}"
+                meta_payload = {
+                    "title": meta.get("title") or first_item.get("metas", {}).get("title") or "PixelSquad Song",
+                    "caption": meta.get("style", "") or first_item.get("prompt", ""),
+                    "lyrics": meta.get("lyrics", "") or first_item.get("lyrics", ""),
+                    "instrumental": meta.get("instrumental", False),
+                    "duration": meta.get("duration", 60.0),
+                    "bpm": meta.get("bpm"),
+                    "keyscale": meta.get("key_scale"),
+                    "vocal_gender": meta.get("vocal_gender"),
+                    "voice_artist": meta.get("voice_artist"),
+                    "mastered": True,
+                    "mastering_preset": preset,
+                    "bitrate": "320k",
+                    "sample_rate": 48000,
+                    "lufs": -11.0,
+                    "model": meta.get("model", "v6-mini"),
+                    "created_at": time.strftime("%Y-%m-%d %H:%M:%S")
+                }
+                with open(dest_json, "w", encoding="utf-8") as f:
+                    json.dump(meta_payload, f, ensure_ascii=False, indent=2)
+
+                audio_url = f"/api/audio-file?path={os.path.abspath(dest_audio)}"
+                success_resp = {
+                    "status": "success",
+                    "stage": "Generation & Mastering Complete",
+                    "progress": 100,
+                    "audio_url": audio_url,
+                    "result": result_list
+                }
+                COMPLETED_TASKS[task_id] = success_resp
+                return success_resp
+            finally:
+                MASTERING_IN_PROGRESS.discard(task_id)
 
     return {
         "status": "success" if is_success else ("failed" if raw_status == -1 else "processing"),

@@ -451,20 +451,20 @@ function selectModel(modelId, label) {
   const shiftVal = document.getElementById('shiftVal');
 
   if (modelId === 'v6-pro') {
-    // v6 Pro: Studio Master Quality (20 diffusion steps, 7.8 CFG)
-    if (stepsSlider) { stepsSlider.value = 20; if (stepsVal) stepsVal.textContent = 20; }
-    if (cfgSlider) { cfgSlider.value = 7.8; if (cfgVal) cfgVal.textContent = '7.8'; }
-    if (shiftSlider) { shiftSlider.value = 3.0; if (shiftVal) shiftVal.textContent = '3.0'; }
+    // v6 Pro: Studio Master Quality (8 turbo steps, 7.8 CFG)
+    if (stepsSlider) { stepsSlider.value = 8; if (stepsVal) stepsVal.textContent = 8; const lbl = document.getElementById('stepsValLabel'); if (lbl) lbl.textContent = 8; }
+    if (cfgSlider) { cfgSlider.value = 7.8; if (cfgVal) cfgVal.textContent = '7.8'; const lbl = document.getElementById('cfgValLabel'); if (lbl) lbl.textContent = '7.8'; }
+    if (shiftSlider) { shiftSlider.value = 3.0; if (shiftVal) shiftVal.textContent = '3.0'; const lbl = document.getElementById('shiftValLabel'); if (lbl) lbl.textContent = '3.0'; }
   } else if (modelId === 'v6-wild') {
-    // v6-wild Pro: Experimental ideas & wild styles (14 steps, 6.5 CFG, 4.5 timestep shift)
-    if (stepsSlider) { stepsSlider.value = 14; if (stepsVal) stepsVal.textContent = 14; }
-    if (cfgSlider) { cfgSlider.value = 6.5; if (cfgVal) cfgVal.textContent = '6.5'; }
-    if (shiftSlider) { shiftSlider.value = 4.5; if (shiftVal) shiftVal.textContent = '4.5'; }
+    // v6-wild Pro: Experimental ideas & wild styles (6 steps, 6.5 CFG, 4.5 timestep shift)
+    if (stepsSlider) { stepsSlider.value = 6; if (stepsVal) stepsVal.textContent = 6; const lbl = document.getElementById('stepsValLabel'); if (lbl) lbl.textContent = 6; }
+    if (cfgSlider) { cfgSlider.value = 6.5; if (cfgVal) cfgVal.textContent = '6.5'; const lbl = document.getElementById('cfgValLabel'); if (lbl) lbl.textContent = '6.5'; }
+    if (shiftSlider) { shiftSlider.value = 4.5; if (shiftVal) shiftVal.textContent = '4.5'; const lbl = document.getElementById('shiftValLabel'); if (lbl) lbl.textContent = '4.5'; }
   } else {
-    // v6-mini: Fast, efficient ACE-Step Turbo (10 steps, 7.0 CFG)
-    if (stepsSlider) { stepsSlider.value = 10; if (stepsVal) stepsVal.textContent = 10; }
-    if (cfgSlider) { cfgSlider.value = 7.0; if (cfgVal) cfgVal.textContent = '7.0'; }
-    if (shiftSlider) { shiftSlider.value = 3.0; if (shiftVal) shiftVal.textContent = '3.0'; }
+    // v6-mini: Fast, ultra-responsive ACE-Step Turbo (4 steps, 7.0 CFG)
+    if (stepsSlider) { stepsSlider.value = 4; if (stepsVal) stepsVal.textContent = 4; const lbl = document.getElementById('stepsValLabel'); if (lbl) lbl.textContent = 4; }
+    if (cfgSlider) { cfgSlider.value = 7.0; if (cfgVal) cfgVal.textContent = '7.0'; const lbl = document.getElementById('cfgValLabel'); if (lbl) lbl.textContent = '7.0'; }
+    if (shiftSlider) { shiftSlider.value = 3.0; if (shiftVal) shiftVal.textContent = '3.0'; const lbl = document.getElementById('shiftValLabel'); if (lbl) lbl.textContent = '3.0'; }
   }
 
   // Close dropdown
@@ -1131,7 +1131,7 @@ async function triggerCreate() {
       repaint_mode: document.getElementById('repaintModeSelect')?.value || 'balanced',
       model: currentSunoModel,
       mastering_preset: document.getElementById('masteringPresetSelect')?.value || 'suno_studio',
-      inference_steps: currentSunoModel === 'v6-pro' ? 20 : (currentSunoModel === 'v6-wild' ? 14 : (parseInt(document.getElementById('stepsSlider')?.value || 10))),
+      inference_steps: currentSunoModel === 'v6-pro' ? 8 : (currentSunoModel === 'v6-wild' ? 6 : (parseInt(document.getElementById('stepsSlider')?.value || 4))),
       guidance_scale: currentSunoModel === 'v6-wild' ? 6.5 : (currentSunoModel === 'v6-pro' ? 7.8 : parseFloat(document.getElementById('cfgSlider')?.value || 7.0)),
       shift: currentSunoModel === 'v6-wild' ? 4.5 : (varietyValue === 'high' ? 4.5 : (varietyValue === 'low' ? 2.0 : 3.0)),
       use_random_seed: document.getElementById('randomSeedToggle')?.checked ?? true,
