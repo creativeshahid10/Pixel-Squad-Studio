@@ -1,0 +1,969 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  --bg-primary: #08090d;
+  --bg-secondary: #0f1118;
+  --bg-tertiary: #161822;
+  --bg-card: #1c1f2e;
+  --bg-card-hover: #232738;
+  --border-subtle: rgba(255, 255, 255, 0.07);
+  --border-focus: #a855f7;
+  
+  --accent-pink: #ec4899;
+  --accent-purple: #8b5cf6;
+  --accent-indigo: #6366f1;
+  --accent-cyan: #06b6d4;
+  --accent-orange: #f97316;
+
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --text-dim: #64748b;
+  
+  --gradient-suno: linear-gradient(135deg, #f43f5e 0%, #ec4899 35%, #a855f7 70%, #6366f1 100%);
+  --gradient-glow: 0 0 30px rgba(236, 72, 153, 0.35);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: var(--bg-primary);
+  color: var(--text-main);
+  height: 100vh;
+  overflow: hidden;
+  user-select: none;
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Monospace fonts for lyrics */
+.font-mono {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Glassmorphism */
+.glass-panel {
+  background: rgba(15, 17, 24, 0.75);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border-subtle);
+}
+
+/* Suno Neon Button */
+.btn-suno {
+  background: var(--gradient-suno);
+  color: #ffffff;
+  font-weight: 700;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(168, 85, 247, 0.35);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-suno:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 28px rgba(236, 72, 153, 0.55);
+  filter: brightness(1.08);
+}
+
+.btn-suno:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn-suno:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  filter: grayscale(0.2);
+}
+
+/* Quick tag pill buttons */
+.tag-pill {
+  padding: 6px 12px;
+  border-radius: 9999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.tag-pill:hover {
+  background: rgba(168, 85, 247, 0.2);
+  border-color: rgba(168, 85, 247, 0.5);
+  color: #fff;
+  transform: scale(1.03);
+}
+
+.tag-pill.active {
+  background: var(--gradient-suno);
+  color: white;
+  border-color: transparent;
+  box-shadow: 0 0 12px rgba(168, 85, 247, 0.4);
+}
+
+/* Custom switch */
+.suno-switch input:checked + .slider {
+  background: var(--gradient-suno);
+}
+
+.suno-switch input:checked + .slider:before {
+  transform: translateX(20px);
+}
+
+/* Song card animations */
+.song-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.song-card:hover {
+  background: var(--bg-card-hover);
+  border-color: rgba(255, 255, 255, 0.18);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.45);
+}
+
+.song-card.playing {
+  border-color: var(--accent-pink);
+  box-shadow: 0 0 20px rgba(236, 72, 153, 0.25);
+}
+
+/* Animated sound wave bars */
+.wave-bar {
+  display: inline-block;
+  width: 3px;
+  background-color: var(--accent-pink);
+  border-radius: 9999px;
+  animation: pulse-wave 1.2s ease-in-out infinite;
+}
+
+@keyframes pulse-wave {
+  0%, 100% { height: 4px; }
+  50% { height: 18px; }
+}
+
+/* Spinning gradient border */
+@keyframes spin-gradient {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-ring {
+  border: 3px solid rgba(255, 255, 255, 0.1);
+  border-top-color: var(--accent-pink);
+  border-radius: 50%;
+  animation: spin-gradient 0.8s linear infinite;
+}
+
+/* Karaoke lyrics modal */
+.lyrics-drawer {
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.lyrics-drawer.open {
+  transform: translateX(0);
+}
+
+.lyrics-drawer.closed {
+  transform: translateX(100%);
+}
+
+/* ========================================================
+   PIXELSQUAD STUDIO & SUNO CREATION CONTROLS (@image1)
+   ======================================================== */
+
+.ps-control-row {
+  background: #11131a;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.ps-control-row:hover {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: #151821;
+}
+
+.ps-segmented-group {
+  background: #090a0f;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 3px;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.ps-segmented-btn {
+  padding: 4px 12px;
+  border-radius: 7px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: #8b92a5;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ps-segmented-btn:hover {
+  color: #ffffff;
+}
+
+.ps-segmented-btn.active {
+  background: #252836;
+  color: #ffffff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
+/* Notched Sliders (Weirdness, Style Influence, Variety) */
+.notched-slider-wrap {
+  position: relative;
+  width: 140px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+}
+
+.notched-track-ticks {
+  position: absolute;
+  inset-x: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.notched-tick {
+  width: 2px;
+  height: 12px;
+  background-color: #3b4256;
+  border-radius: 1px;
+  flex-shrink: 0;
+}
+
+.notched-range {
+  position: relative;
+  width: 100%;
+  height: 24px;
+  background: transparent !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  cursor: pointer;
+  z-index: 3;
+  margin: 0;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.notched-range:focus {
+  outline: none !important;
+}
+
+.notched-range::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 24px;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.notched-range::-webkit-slider-thumb {
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  width: 11px;
+  height: 20px;
+  border-radius: 6px;
+  background: #ff2e8c !important;
+  box-shadow: 0 0 10px rgba(255, 46, 140, 0.7) !important;
+  margin-top: 2px;
+  border: none !important;
+  cursor: grab;
+  transition: transform 0.15s ease;
+}
+
+.notched-range::-webkit-slider-thumb:active {
+  cursor: grabbing;
+  transform: scale(1.1);
+}
+
+.notched-range::-moz-range-track {
+  width: 100%;
+  height: 24px;
+  background: transparent !important;
+  border: none !important;
+}
+
+.notched-range::-moz-range-thumb {
+  width: 11px;
+  height: 20px;
+  border-radius: 6px;
+  background: #ff2e8c !important;
+  box-shadow: 0 0 10px rgba(255, 46, 140, 0.7) !important;
+  border: none !important;
+  cursor: grab;
+}
+
+/* PixelSquad Glowing Highlights */
+.ps-logo-glow {
+  filter: drop-shadow(0 0 10px rgba(0, 204, 255, 0.35));
+}
+
+/* ========================================================
+   BLACK & WHITE (MONOCHROME) THEME
+   ======================================================== */
+[data-theme="bw"] {
+  --bg-primary: #050505;
+  --bg-secondary: #0d0d0d;
+  --bg-tertiary: #141414;
+  --bg-card: #181818;
+  --bg-card-hover: #222222;
+  --border-subtle: rgba(255, 255, 255, 0.16);
+  --border-focus: #ffffff;
+  --text-main: #ffffff;
+  --text-muted: #a3a3a3;
+  --text-dim: #737373;
+  --accent-pink: #ffffff;
+  --accent-purple: #ffffff;
+  --gradient-suno: linear-gradient(135deg, #ffffff 0%, #d4d4d4 50%, #737373 100%);
+}
+
+[data-theme="bw"] body {
+  background-color: #050505 !important;
+  color: #ffffff !important;
+}
+[data-theme="bw"] .bg-brandDark { background-color: #050505 !important; }
+[data-theme="bw"] .bg-brandNav { background-color: #0d0d0d !important; }
+[data-theme="bw"] .bg-brandSurface { background-color: #141414 !important; }
+[data-theme="bw"] .border-white\/5,
+[data-theme="bw"] .border-white\/10 { border-color: rgba(255, 255, 255, 0.16) !important; }
+
+[data-theme="bw"] .btn-suno {
+  background: #ffffff !important;
+  color: #000000 !important;
+  font-weight: 800;
+  box-shadow: 0 4px 16px rgba(255, 255, 255, 0.25) !important;
+}
+
+[data-theme="bw"] .notched-range::-webkit-slider-thumb {
+  background: #ffffff !important;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.9) !important;
+}
+[data-theme="bw"] .notched-range::-moz-range-thumb {
+  background: #ffffff !important;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.9) !important;
+}
+[data-theme="bw"] .notched-tick {
+  background-color: #555555 !important;
+}
+
+[data-theme="bw"] .ps-segmented-btn.active {
+  background: #ffffff !important;
+  color: #000000 !important;
+  font-weight: 700;
+}
+
+[data-theme="bw"] .text-cyan-400,
+[data-theme="bw"] .text-purple-400,
+[data-theme="bw"] .text-pink-400,
+[data-theme="bw"] .text-purple-300 {
+  color: #ffffff !important;
+}
+[data-theme="bw"] .bg-purple-600\/20,
+[data-theme="bw"] .bg-purple-600\/30,
+[data-theme="bw"] .bg-cyan-500\/15 {
+  background-color: rgba(255, 255, 255, 0.12) !important;
+  border-color: rgba(255, 255, 255, 0.25) !important;
+}
+[data-theme="bw"] .tag-pill:hover {
+  background: rgba(255, 255, 255, 0.2) !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+}
+
+/* Track Artwork Thumbnail (Non-colorful sleek matte studio style) */
+.track-artwork-thumb {
+  background: linear-gradient(135deg, #1e2029 0%, #121319 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  position: relative;
+}
+
+.track-artwork-thumb > svg {
+  color: #8b92a5 !important;
+}
+
+.song-card:hover .track-artwork-thumb {
+  border-color: rgba(255, 255, 255, 0.25) !important;
+}
+
+.song-card:hover .track-artwork-thumb > svg {
+  color: #ffffff !important;
+}
+
+/* Play/Pause Overlay & Badge (Visible on hover in all themes) */
+.track-play-overlay {
+  background-color: rgba(0, 0, 0, 0.6) !important;
+  backdrop-filter: blur(2px) !important;
+  z-index: 10 !important;
+}
+
+.track-play-badge {
+  background-color: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 9999px !important;
+  transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.15s ease !important;
+}
+
+.track-play-badge:hover {
+  transform: scale(1.12) !important;
+}
+
+.track-play-badge svg,
+.track-play-badge i,
+.track-play-badge .track-play-icon {
+  color: #0f172a !important;
+  fill: #0f172a !important;
+  stroke: #0f172a !important;
+  width: 15px !important;
+  height: 15px !important;
+  display: block !important;
+}
+
+[data-theme="bw"] .track-artwork-thumb {
+  background: #141414 !important;
+  border-color: #333333 !important;
+}
+
+[data-theme="bw"] .track-artwork-thumb > svg {
+  color: #ffffff !important;
+}
+
+[data-theme="bw"] .track-play-overlay {
+  background-color: rgba(0, 0, 0, 0.75) !important;
+}
+
+[data-theme="bw"] .track-play-badge {
+  background-color: #ffffff !important;
+}
+
+[data-theme="bw"] .track-play-badge svg,
+[data-theme="bw"] .track-play-badge .track-play-icon {
+  color: #000000 !important;
+  fill: #000000 !important;
+  stroke: #000000 !important;
+}
+
+/* ========================================================
+   CLEAN WHITE (LIGHT) THEME - COMPREHENSIVE OVERRIDES
+   ======================================================== */
+[data-theme="light"] {
+  --bg-primary: #f8fafc;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #f1f5f9;
+  --bg-card: #ffffff;
+  --border-subtle: #e2e8f0;
+  --text-main: #0f172a;
+  --text-muted: #475569;
+}
+
+[data-theme="light"] body {
+  background-color: #f8fafc !important;
+  color: #0f172a !important;
+}
+
+/* Structural Panels */
+[data-theme="light"] header,
+[data-theme="light"] #sunoSidebar,
+[data-theme="light"] #createDrawer,
+[data-theme="light"] .bg-brandNav,
+[data-theme="light"] [class*="bg-brandNav"],
+[data-theme="light"] .bg-brandSurface,
+[data-theme="light"] [class*="bg-brandSurface"] {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+}
+
+/* Inner containers & Dark blocks */
+[data-theme="light"] .bg-brandDark,
+[data-theme="light"] [class*="bg-brandDark"],
+[data-theme="light"] [class*="bg-black"],
+[data-theme="light"] [class*="bg-purple-950"] {
+  background-color: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+}
+
+/* Tracks Feed */
+[data-theme="light"] #tracksFeed {
+  background-color: #f8fafc !important;
+}
+
+/* Typography Overrides */
+[data-theme="light"] .text-white,
+[data-theme="light"] .text-slate-100,
+[data-theme="light"] .text-slate-200 {
+  color: #0f172a !important;
+}
+
+[data-theme="light"] .text-slate-300,
+[data-theme="light"] .text-slate-400 {
+  color: #334155 !important;
+}
+
+[data-theme="light"] .text-slate-500 {
+  color: #64748b !important;
+}
+
+[data-theme="light"] .text-cyan-400,
+[data-theme="light"] .text-purple-400,
+[data-theme="light"] .text-amber-400,
+[data-theme="light"] .text-pink-400 {
+  color: #0f172a !important;
+}
+
+/* Borders */
+[data-theme="light"] [class*="border-white"],
+[data-theme="light"] [class*="border-purple"],
+[data-theme="light"] [class*="border-cyan"] {
+  border-color: #e2e8f0 !important;
+}
+
+/* Inputs, textareas, selects */
+[data-theme="light"] textarea,
+[data-theme="light"] input[type="text"],
+[data-theme="light"] input[type="number"],
+[data-theme="light"] select {
+  background-color: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #0f172a !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+}
+
+[data-theme="light"] textarea::placeholder,
+[data-theme="light"] input::placeholder {
+  color: #94a3b8 !important;
+}
+
+[data-theme="light"] textarea:focus,
+[data-theme="light"] input:focus,
+[data-theme="light"] select:focus {
+  border-color: #0f172a !important;
+  box-shadow: 0 0 0 2px rgba(15, 23, 42, 0.1) !important;
+}
+
+/* Mode Switcher Tabs */
+[data-theme="light"] .mode-tab-btn {
+  color: #475569 !important;
+  background-color: transparent !important;
+  border-color: transparent !important;
+}
+[data-theme="light"] .mode-tab-btn:hover {
+  color: #0f172a !important;
+  background-color: #f1f5f9 !important;
+}
+[data-theme="light"] .mode-tab-btn.bg-purple-600\/30,
+[data-theme="light"] .mode-tab-btn.bg-amber-500\/25 {
+  background-color: #0f172a !important;
+  color: #ffffff !important;
+  border-color: #0f172a !important;
+}
+[data-theme="light"] .mode-tab-btn.bg-purple-600\/30 svg,
+[data-theme="light"] .mode-tab-btn.bg-amber-500\/25 svg {
+  color: #ffffff !important;
+}
+
+/* Accordion Details */
+[data-theme="light"] details.group {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03) !important;
+}
+
+/* Tag Pills */
+[data-theme="light"] .tag-pill {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  color: #334155 !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03) !important;
+}
+[data-theme="light"] .tag-pill:hover {
+  background-color: #0f172a !important;
+  color: #ffffff !important;
+  border-color: #0f172a !important;
+}
+
+/* Track Cards */
+[data-theme="light"] .song-card {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+}
+[data-theme="light"] .song-card:hover {
+  background-color: #f8fafc !important;
+  border-color: #cbd5e1 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.07) !important;
+}
+[data-theme="light"] .song-card.playing {
+  border-color: #0f172a !important;
+  background-color: #f8fafc !important;
+}
+
+/* Non-colorful artwork thumbnail in Light Theme */
+[data-theme="light"] .track-artwork-thumb {
+  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%) !important;
+  border-color: #cbd5e1 !important;
+}
+[data-theme="light"] .track-artwork-thumb > svg {
+  color: #64748b !important;
+}
+[data-theme="light"] .song-card:hover .track-artwork-thumb > svg {
+  color: #0f172a !important;
+}
+
+[data-theme="light"] .track-play-overlay {
+  background-color: rgba(15, 23, 42, 0.55) !important;
+}
+
+[data-theme="light"] .track-play-badge {
+  background-color: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3) !important;
+}
+
+[data-theme="light"] .track-play-badge svg,
+[data-theme="light"] .track-play-badge .track-play-icon {
+  color: #0f172a !important;
+  fill: #0f172a !important;
+  stroke: #0f172a !important;
+}
+
+/* Explore History Banner */
+.explore-history-banner {
+  transition: all 0.2s ease;
+}
+
+[data-theme="light"] .explore-history-banner {
+  background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%) !important;
+  border-color: #cbd5e1 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+}
+
+[data-theme="light"] .explore-history-banner h3 span:first-child {
+  color: #0f172a !important;
+}
+
+[data-theme="light"] .explore-history-banner p {
+  color: #475569 !important;
+}
+
+[data-theme="bw"] .explore-history-banner {
+  background: #141414 !important;
+  border-color: #333333 !important;
+}
+
+[data-theme="bw"] .explore-history-banner h3 span:first-child {
+  color: #ffffff !important;
+}
+
+/* Bottom Player in light theme */
+[data-theme="light"] #bottomPlayer {
+  background-color: #ffffff !important;
+  border-top-color: #e2e8f0 !important;
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.06) !important;
+}
+[data-theme="light"] #bottomPlayer #playerThumb {
+  background-color: #f1f5f9 !important;
+  border-color: #e2e8f0 !important;
+}
+
+/* Primary Create Button */
+[data-theme="light"] .btn-suno {
+  background: #0f172a !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.2) !important;
+}
+[data-theme="light"] .btn-suno:hover {
+  background: #1e293b !important;
+}
+
+/* Dialogue Badge in Light Theme */
+[data-theme="light"] .dialogue-badge {
+  background: #fef3c7 !important;
+  color: #b45309 !important;
+  border-color: #fde68a !important;
+}
+
+/* Vocal & Generation Tuning Controls in Light Theme */
+[data-theme="light"] .ps-control-row {
+  background: #f8fafc !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03) !important;
+}
+
+[data-theme="light"] .ps-control-row:hover {
+  background: #f1f5f9 !important;
+  border-color: #cbd5e1 !important;
+}
+
+[data-theme="light"] .ps-control-row span,
+[data-theme="light"] .ps-control-row label,
+[data-theme="light"] .ps-control-row .text-slate-200,
+[data-theme="light"] .ps-control-row .text-slate-300 {
+  color: #0f172a !important;
+  font-weight: 600 !important;
+}
+
+[data-theme="light"] .ps-control-row .text-slate-500 {
+  color: #94a3b8 !important;
+}
+
+[data-theme="light"] .ps-control-row .text-slate-500:hover,
+[data-theme="light"] .ps-control-row span[title]:hover {
+  color: #0f172a !important;
+}
+
+[data-theme="light"] #weirdnessVal,
+[data-theme="light"] #styleInfluenceVal,
+[data-theme="light"] #varietyVal {
+  color: #0f172a !important;
+  font-weight: 700 !important;
+}
+
+[data-theme="light"] .ps-segmented-group {
+  background: #e2e8f0 !important;
+  border: 1px solid #cbd5e1 !important;
+}
+
+[data-theme="light"] .ps-segmented-btn {
+  color: #475569 !important;
+  background: transparent !important;
+}
+
+[data-theme="light"] .ps-segmented-btn:hover {
+  color: #0f172a !important;
+}
+
+[data-theme="light"] .ps-segmented-btn.active {
+  background: #ffffff !important;
+  color: #0f172a !important;
+  font-weight: 700 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12) !important;
+}
+
+/* Notched Slider in Light Theme */
+[data-theme="light"] .notched-range::-webkit-slider-thumb {
+  background: #ec4899 !important;
+  box-shadow: 0 0 10px rgba(236, 72, 153, 0.7) !important;
+}
+[data-theme="light"] .notched-range::-moz-range-thumb {
+  background: #ec4899 !important;
+  box-shadow: 0 0 10px rgba(236, 72, 153, 0.7) !important;
+}
+[data-theme="light"] .notched-tick {
+  background-color: #cbd5e1 !important;
+}
+
+/* Dialogue Badge in Track Cards */
+.dialogue-badge {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.2) 0%, rgba(217, 119, 6, 0.2) 100%);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.35);
+}
+
+[data-theme="bw"] .dialogue-badge {
+  background: rgba(255, 255, 255, 0.15) !important;
+  color: #ffffff !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+}
+
+/* Recording UI & VU Meter animations */
+.rec-bar {
+  display: inline-block;
+  transform-origin: bottom;
+}
+
+[data-theme="light"] #modalRecordingBox,
+[data-theme="light"] #drawerRecordingBox {
+  background-color: #fff1f2 !important;
+  border-color: #fecdd3 !important;
+}
+
+[data-theme="light"] #modalRecordingBox span.text-rose-300,
+[data-theme="light"] #drawerRecordingBox span.text-rose-300 {
+  color: #e11d48 !important;
+}
+
+[data-theme="light"] #modalRecTimer,
+[data-theme="light"] #drawerRecTimer {
+  color: #be123c !important;
+}
+
+[data-theme="light"] #modalAudioPreviewBox {
+  background-color: #fef3c7 !important;
+  border-color: #fde68a !important;
+}
+
+[data-theme="light"] #modalAudioPreviewBox span.text-amber-300 {
+  color: #b45309 !important;
+}
+
+[data-theme="light"] #modalMicBtn {
+  background-color: #fef3c7 !important;
+  color: #b45309 !important;
+  border-color: #fde68a !important;
+}
+
+[data-theme="light"] #modalMicBtn:hover {
+  background-color: #fde68a !important;
+}
+
+[data-theme="light"] #drawerMicBtn {
+  background-color: #f5f3ff !important;
+  color: #7c3aed !important;
+  border-color: #ddd6fe !important;
+}
+
+[data-theme="bw"] #modalRecordingBox,
+[data-theme="bw"] #drawerRecordingBox {
+  background-color: #1a1a1a !important;
+  border-color: #ffffff !important;
+}
+
+[data-theme="bw"] .rec-bar {
+  background-color: #ffffff !important;
+}
+
+/* ========================================================
+   AUTHENTIC SUNO.COM LEFT SIDEBAR (@image1)
+   ======================================================== */
+.suno-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 10px 16px;
+  border-radius: 9999px;
+  font-size: 0.885rem;
+  font-weight: 500;
+  color: #9ba1b0;
+  background: transparent;
+  border: 1px solid transparent;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  text-align: left;
+}
+
+.suno-nav-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
+}
+
+.suno-nav-item.active {
+  background: #22252d !important;
+  color: #ffffff !important;
+  font-weight: 600;
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.suno-nav-item svg {
+  width: 19px;
+  height: 19px;
+  flex-shrink: 0;
+  color: currentColor;
+}
+
+[data-theme="bw"] #sunoSidebar {
+  background-color: #000000 !important;
+  border-right-color: #222222 !important;
+}
+
+[data-theme="bw"] .suno-nav-item.active {
+  background: #ffffff !important;
+  color: #000000 !important;
+}
+
+[data-theme="bw"] .suno-nav-item.active svg {
+  color: #000000 !important;
+}
+
+[data-theme="light"] #sunoSidebar {
+  background-color: #ffffff !important;
+  border-right-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+[data-theme="light"] .suno-nav-item {
+  color: #475569 !important;
+}
+
+[data-theme="light"] .suno-nav-item:hover {
+  background: rgba(0, 0, 0, 0.04) !important;
+  color: #0f172a !important;
+}
+
+[data-theme="light"] .suno-nav-item.active {
+  background: #f1f5f9 !important;
+  color: #0f172a !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Suno Collapsible Accordion & Summary Rules */
+details.suno-accordion {
+  border: none !important;
+  background: transparent !important;
+}
+
+details.suno-accordion > summary {
+  list-style: none !important;
+}
+
+details.suno-accordion > summary::-webkit-details-marker {
+  display: none !important;
+}
+
+details.suno-accordion[open] > summary {
+  margin-bottom: 2px;
+}
+
+
+

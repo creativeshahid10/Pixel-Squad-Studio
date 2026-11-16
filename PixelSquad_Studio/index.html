@@ -1,0 +1,1361 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PixelSquad Music Studio — Powered by ACE-Step 1.5</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brandDark: '#08090d',
+            brandNav: '#0e1017',
+            brandSurface: '#141722',
+            brandCard: '#1a1d2c',
+            brandHover: '#222638',
+            psCyan: '#00ccff',
+            psRed: '#ff0000',
+            psLime: '#99ff00',
+            psOrange: '#ffa600',
+            sunoPink: '#ec4899',
+            sunoPurple: '#8b5cf6',
+            sunoIndigo: '#6366f1',
+          }
+        }
+      }
+    }
+  </script>
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body class="bg-brandDark text-slate-100 flex h-screen overflow-hidden">
+
+  <!-- COLUMN 1: AUTHENTIC SUNO.COM LEFT SIDEBAR (@image1) -->
+  <aside id="sunoSidebar" class="w-60 bg-[#0a0b0f] border-r border-white/5 flex flex-col justify-between p-3.5 shrink-0 z-30 transition-all duration-300 select-none">
+    <div class="space-y-4">
+      
+      <!-- Top: Brand Header & Collapse Toggle -->
+      <div class="flex items-center justify-between px-2 py-1">
+        <div class="flex items-center gap-2.5">
+          <!-- PixelSquad Official Colorful Vector Emblem -->
+          <div class="w-7 h-7 rounded-lg bg-black/50 border border-white/10 flex items-center justify-center shadow-md shadow-cyan-500/10">
+            <svg viewBox="296 174 156 156" class="w-4.5 h-4.5 shrink-0 drop-shadow-[0_0_6px_rgba(0,204,255,0.4)]">
+              <polygon fill="#FF0000" points="350.5 176.52 370.94 176.52 370.94 196.97 350.5 196.97"/>
+              <polygon fill="#00CCFF" points="397.27 176.52 376.83 176.52 376.83 196.97 397.27 196.97"/>
+              <polygon fill="#FF0000" points="345.62 223.29 325.18 223.29 325.18 202.85 345.62 202.85"/>
+              <polygon fill="#E50000" points="350.5 223.29 370.94 223.29 370.94 202.85 350.5 202.85"/>
+              <polygon fill="#00B8F0" points="397.27 223.29 376.83 223.29 376.83 202.85 397.27 202.85"/>
+              <polygon fill="#00CCFF" points="403.15 223.29 423.59 223.29 423.59 202.85 403.15 202.85"/>
+              <polygon fill="#FF0000" points="298.86 229.17 319.3 229.17 319.3 249.61 298.86 249.61"/>
+              <polygon fill="#E50000" points="345.62 229.17 325.18 229.17 325.18 249.61 345.62 249.61"/>
+              <polygon fill="#CF0000" points="350.5 229.17 370.94 229.17 370.94 249.61 350.5 249.61"/>
+              <polygon fill="#0094D6" points="397.27 229.17 376.83 229.17 376.83 249.61 397.27 249.61"/>
+              <polygon fill="#00B8F0" points="403.15 229.17 423.59 229.17 423.59 249.61 403.15 249.61"/>
+              <polygon fill="#00CCFF" points="448.92 229.17 428.47 229.17 428.47 249.61 448.92 249.61"/>
+              <polygon fill="#99FF00" points="298.86 274.94 319.3 274.94 319.3 254.49 298.86 254.49"/>
+              <polygon fill="#8AE50A" points="345.62 274.94 325.18 274.94 325.18 254.49 345.62 254.49"/>
+              <polygon fill="#7DCF12" points="350.5 274.94 370.94 274.94 370.94 254.49 350.5 254.49"/>
+              <polygon fill="#FFA600" points="397.27 274.94 376.83 274.94 376.83 254.49 397.27 254.49"/>
+              <polygon fill="#FFBA00" points="403.15 274.94 423.59 274.94 423.59 254.49 403.15 254.49"/>
+              <polygon fill="#FFE500" points="448.92 274.94 428.47 274.94 428.47 254.49 448.92 254.49"/>
+              <polygon fill="#99FF00" points="345.62 280.82 325.18 280.82 325.18 301.26 345.62 301.26"/>
+              <polygon fill="#8AE50A" points="350.5 280.82 370.94 280.82 370.94 301.26 350.5 301.26"/>
+              <polygon fill="#FFBA00" points="397.27 280.82 376.83 280.82 376.83 301.26 397.27 301.26"/>
+              <polygon fill="#FFE500" points="403.15 280.82 423.59 280.82 423.59 301.26 403.15 301.26"/>
+              <polygon fill="#99FF00" points="350.5 326.58 370.94 326.58 370.94 306.14 350.5 306.14"/>
+              <polygon fill="#FFE500" points="397.27 326.58 376.83 326.58 376.83 306.14 397.27 306.14"/>
+            </svg>
+          </div>
+          <span id="sidebarLogoText" class="font-extrabold tracking-tight text-base text-white">PixelSquad</span>
+        </div>
+        <button onclick="toggleSidebar()" class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition cursor-pointer" title="Toggle Sidebar Width">
+          <i data-lucide="columns-2" id="sidebarToggleIcon" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- Main PixelSquad Navigation Menu -->
+      <nav class="space-y-1">
+        <!-- 1. Home Feed -->
+        <button id="navHomeBtn" onclick="switchNavTab('home')" class="suno-nav-item active" title="Home Studio Feed">
+          <i data-lucide="home" class="w-5 h-5"></i>
+          <span class="nav-label">Home</span>
+        </button>
+
+        <!-- 2. Create Music (Audio Generation) -->
+        <button id="navCreateBtn" onclick="switchNavTab('create')" class="suno-nav-item" title="Music Generator (Lyrics, Style & AI Music)">
+          <i data-lucide="music-2" class="w-5 h-5 text-purple-400"></i>
+          <span class="nav-label">Music Generator</span>
+        </button>
+
+        <!-- 3. Dialogue & Speech Lab -->
+        <button id="navDialogueBtn" onclick="switchNavTab('dialogue')" class="suno-nav-item" title="Dialogue & Speech Lab (Hindi, English, ElevenLabs)">
+          <i data-lucide="mic-2" class="w-5 h-5 text-amber-400"></i>
+          <span class="nav-label flex items-center justify-between w-full">
+            <span>Dialogue Lab</span>
+            <span class="text-[9px] px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 font-bold">TTS</span>
+          </span>
+        </button>
+
+        <!-- 4. Voice Cloner -->
+        <button id="navCloneBtn" onclick="switchNavTab('cloner')" class="suno-nav-item" title="Audio & Voice Cloner (Record Mic / Sample to Timbre)">
+          <i data-lucide="fingerprint" class="w-5 h-5 text-rose-400"></i>
+          <span class="nav-label flex items-center justify-between w-full">
+            <span>Voice Cloner</span>
+            <span class="text-[9px] px-1.5 py-0.2 rounded bg-rose-500/20 text-rose-300 font-bold">AI</span>
+          </span>
+        </button>
+
+        <!-- 5. Audio Studio & Tuning Engine -->
+        <button id="navStudioBtn" onclick="switchNavTab('studio')" class="suno-nav-item" title="Audio Engine, BPM, Key Scale & Diffusion Tuning">
+          <i data-lucide="sliders-horizontal" class="w-5 h-5 text-emerald-400"></i>
+          <span class="nav-label">Audio Studio</span>
+        </button>
+
+        <!-- 6. History & Past Creations -->
+        <button id="navExploreBtn" onclick="switchNavTab('explore')" class="suno-nav-item" title="Explore Music & Dialogue History">
+          <i data-lucide="history" class="w-5 h-5 text-cyan-400"></i>
+          <span class="nav-label">History Explorer</span>
+        </button>
+
+        <!-- 7. User Profile Pill -->
+        <button id="navUserBtn" onclick="showUserProfileModal()" class="suno-nav-item mt-1.5" title="User Profile: Shahid">
+          <span class="w-5 h-5 rounded-full bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 shrink-0 shadow-sm"></span>
+          <span id="sidebarUserText" class="nav-label truncate text-xs text-slate-300">shahid.pixelsquad</span>
+        </button>
+      </nav>
+
+      <!-- Secondary Hardware Info Section (with gap) -->
+      <div class="pt-4 space-y-1 border-t border-white/5">
+        <!-- 8. Local Hardware Engine -->
+        <button id="navCreditsBtn" onclick="showCreditsInfo()" class="suno-nav-item" title="NVIDIA GeForce RTX 3060 Laptop (6GB VRAM)">
+          <i data-lucide="cpu" class="w-5 h-5 text-emerald-400"></i>
+          <span class="nav-label flex items-center justify-between w-full">
+            <span>RTX 3060 (6GB)</span>
+            <span class="text-[9px] px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 font-bold">Local</span>
+          </span>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN APP CONTAINER (HEADER + WORKSPACE + BOTTOM PLAYER) -->
+  <div class="flex-1 flex flex-col min-w-0 overflow-hidden relative">
+
+    <!-- TOP APP BAR / BRAND HEADER -->
+    <header class="h-14 border-b border-white/5 bg-brandNav/90 backdrop-blur-md flex items-center justify-between px-5 z-20 shrink-0">
+      <div class="flex items-center gap-2">
+        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">PixelSquad Studio</span>
+        <span class="text-slate-600">/</span>
+        <span id="headerActiveSection" class="text-xs font-semibold text-white">Create Music & Speech</span>
+      </div>
+
+      <!-- Middle Search / Vibe Filter -->
+      <div class="hidden md:flex items-center gap-2 bg-brandSurface/80 border border-white/10 rounded-full px-3.5 py-1.5 w-80 text-sm focus-within:border-cyan-500 transition-all">
+        <i data-lucide="search" class="w-4 h-4 text-slate-400"></i>
+        <input id="searchInput" type="text" placeholder="Search PixelSquad tracks, lyrics, artists..." class="bg-transparent border-none outline-none text-slate-200 text-xs w-full">
+      </div>
+
+      <!-- Right Actions: Theme Toggle & GPU Status -->
+      <div class="flex items-center gap-2.5">
+        <!-- Black & White / Theme Toggle -->
+        <button id="themeToggleBtn" onclick="toggleTheme()" class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs text-slate-300 hover:text-white hover:bg-white/10 transition cursor-pointer" title="Toggle Theme (Light / Dark / B&W)">
+          <i data-lucide="sun" id="themeIcon" class="w-3.5 h-3.5 text-amber-500"></i>
+          <span id="themeLabel" class="font-medium text-xs hidden sm:inline">Theme: Light</span>
+        </button>
+
+        <div id="gpuStatusBadge" class="hidden sm:flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs text-slate-300">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span id="gpuModelLabel" class="font-medium text-slate-200">PixelSquad OS • RTX 3060 (6GB)</span>
+        </div>
+        <button onclick="refreshTracks()" class="p-2 rounded-lg hover:bg-white/5 text-slate-400 hover:text-white transition" title="Refresh Songs">
+          <i data-lucide="rotate-cw" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- MAIN STUDIO WORKSPACE (CREATE DRAWER + TRACKS FEED) -->
+    <div class="flex flex-1 overflow-hidden relative">
+
+      <!-- COLUMN 2: THE STUDIO CREATE DRAWER -->
+      <main id="createDrawer" class="w-full lg:w-[480px] xl:w-[520px] bg-brandSurface/90 border-r border-white/5 flex flex-col overflow-y-auto px-5 py-5 shrink-0 z-10 space-y-3.5">
+        
+        <!-- SUNO HEADER TABS: Songs | Speech -->
+        <div class="flex items-center border-b border-white/10 mb-1 shrink-0">
+          <button id="topTabSongs" onclick="switchCreateSubTab('songs')" class="flex-1 pb-2.5 text-sm font-bold text-white border-b-2 border-white transition flex items-center justify-center gap-1.5 cursor-pointer">
+            <span>Songs</span>
+          </button>
+          <button id="topTabSpeech" onclick="switchCreateSubTab('speech')" class="flex-1 pb-2.5 text-sm font-bold text-slate-400 hover:text-slate-200 border-b-2 border-transparent transition flex items-center justify-center gap-1.5 cursor-pointer">
+            <span>Speech</span>
+          </button>
+        </div>
+
+        <!-- SUNO SUB-HEADER ROW: Simple/Advanced Toggle + Model Selector Dropdown -->
+        <div id="songsControlRow" class="flex items-center justify-between gap-2 shrink-0 py-1">
+          <!-- Simple / Advanced Pill Switcher -->
+          <div class="inline-flex p-1 rounded-full bg-[#12131a] border border-white/10 text-xs shadow-inner">
+            <button id="pillSimpleBtn" type="button" onclick="setSongSubMode('simple')" class="px-3.5 py-1 rounded-full text-slate-400 hover:text-white transition font-medium cursor-pointer">Simple</button>
+            <button id="pillAdvancedBtn" type="button" onclick="setSongSubMode('advanced')" class="px-3.5 py-1 rounded-full bg-[#222533] text-white font-semibold transition cursor-pointer shadow-sm">Advanced</button>
+          </div>
+
+          <!-- Suno Model Dropdown (v6-mini ▾) -->
+          <div class="relative">
+            <button id="modelSelectBtn" type="button" onclick="toggleModelDropdown(event)" class="px-3.5 py-1.5 rounded-full bg-brandDark border border-white/10 hover:border-white/20 text-xs text-slate-200 flex items-center gap-1.5 transition cursor-pointer">
+              <span id="selectedModelLabel" class="font-medium text-xs">v6-mini</span>
+              <i data-lucide="chevron-down" id="modelDropdownChevron" class="w-3.5 h-3.5 text-slate-400 transition-transform"></i>
+            </button>
+
+            <!-- Floating Model Dropdown Menu -->
+            <div id="modelDropdownMenu" class="hidden absolute right-0 mt-2 w-72 rounded-2xl bg-brandSurface/95 backdrop-blur-xl border border-white/10 p-2 shadow-2xl z-50 space-y-1 text-left">
+              <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-2.5 pt-1.5 pb-0.5">ALL MODELS</div>
+              
+              <!-- 1. v6 Pro -->
+              <button type="button" onclick="selectModel('v6-pro', 'v6 Pro')" class="model-opt-btn w-full text-left p-2.5 rounded-xl hover:bg-white/5 transition flex flex-col gap-0.5 cursor-pointer group">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-1.5">
+                    <span class="text-xs font-bold text-white group-hover:text-purple-300">v6</span>
+                    <span class="text-[9px] px-1.5 py-0.2 rounded bg-purple-500/20 text-purple-300 font-bold border border-purple-500/30">Pro</span>
+                  </div>
+                  <i data-lucide="check" class="model-check-icon hidden w-3.5 h-3.5 text-emerald-400" id="check-v6-pro"></i>
+                </div>
+                <span class="text-[11px] text-slate-400 leading-tight">Powerful. Versatile. Refined. Our best model yet.</span>
+              </button>
+
+              <!-- 2. v6-wild Pro -->
+              <button type="button" onclick="selectModel('v6-wild', 'v6-wild Pro')" class="model-opt-btn w-full text-left p-2.5 rounded-xl hover:bg-white/5 transition flex flex-col gap-0.5 cursor-pointer group">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-1.5">
+                    <span class="text-xs font-bold text-white group-hover:text-purple-300">v6-wild</span>
+                    <span class="text-[9px] px-1.5 py-0.2 rounded bg-purple-500/20 text-purple-300 font-bold border border-purple-500/30">Pro</span>
+                  </div>
+                  <i data-lucide="check" class="model-check-icon hidden w-3.5 h-3.5 text-emerald-400" id="check-v6-wild"></i>
+                </div>
+                <span class="text-[11px] text-slate-400 leading-tight">Best for experimental ideas.</span>
+              </button>
+
+              <!-- 3. v6-mini (Default) -->
+              <button type="button" onclick="selectModel('v6-mini', 'v6-mini')" class="model-opt-btn w-full text-left p-2.5 rounded-xl bg-white/10 text-white transition flex flex-col gap-0.5 cursor-pointer group">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-bold text-white">v6-mini</span>
+                  <i data-lucide="check" class="model-check-icon w-3.5 h-3.5 text-emerald-400" id="check-v6-mini"></i>
+                </div>
+                <span class="text-[11px] text-slate-300 leading-tight">A free, more efficient version of premium v6 models.</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- + AUDIO PILL BUTTON (Suno Style) -->
+        <div id="plusAudioContainer" class="shrink-0">
+          <button id="plusAudioBtn" type="button" onclick="toggleAudioUploadZone()" class="w-full py-2 px-4 rounded-full bg-brandDark/80 hover:bg-brandDark border border-white/10 hover:border-purple-500/50 text-xs font-semibold text-slate-300 hover:text-white flex items-center justify-center gap-1.5 transition cursor-pointer">
+            <i data-lucide="plus" class="w-3.5 h-3.5 text-slate-400"></i>
+            <span>+ Audio</span>
+          </button>
+        </div>
+
+        <!-- SECONDARY CREATION STYLES (Remix / Repaint / Cloner) -->
+        <div id="subModeSwitcherRow" class="flex items-center gap-1.5 p-1 bg-brandDark/80 rounded-xl border border-white/5 text-[11px] font-semibold overflow-x-auto shrink-0">
+          <button id="modeTabCustom" onclick="setStudioMode('custom')" class="mode-tab-btn flex-1 py-1 px-2 rounded-lg bg-purple-600/30 text-purple-300 border border-purple-500/40 whitespace-nowrap flex items-center justify-center gap-1 transition">
+            <i data-lucide="music-2" class="w-3 h-3"></i> Advanced
+          </button>
+          <button id="modeTabSimple" onclick="setStudioMode('simple')" class="mode-tab-btn flex-1 py-1 px-2 rounded-lg text-slate-400 hover:text-white whitespace-nowrap flex items-center justify-center gap-1 transition">
+            <i data-lucide="sparkles" class="w-3 h-3"></i> Simple
+          </button>
+          <button id="modeTabCover" onclick="setStudioMode('cover')" class="mode-tab-btn flex-1 py-1 px-2 rounded-lg text-slate-400 hover:text-white whitespace-nowrap flex items-center justify-center gap-1 transition">
+            <i data-lucide="repeat" class="w-3 h-3"></i> Remix / Cover
+          </button>
+          <button id="modeTabRepaint" onclick="setStudioMode('repaint')" class="mode-tab-btn flex-1 py-1 px-2 rounded-lg text-slate-400 hover:text-white whitespace-nowrap flex items-center justify-center gap-1 transition">
+            <i data-lucide="scissors" class="w-3 h-3"></i> Repaint
+          </button>
+          <button id="modeTabDialogue" onclick="setStudioMode('dialogue')" class="mode-tab-btn flex-1 py-1 px-2 rounded-lg text-slate-400 hover:text-white whitespace-nowrap flex items-center justify-center gap-1 transition">
+            <i data-lucide="mic-2" class="w-3 h-3 text-amber-400"></i> Dialogue
+          </button>
+          <button id="modeTabCloner" onclick="setStudioMode('cloner')" class="mode-tab-btn flex-1 py-1 px-2 rounded-lg text-slate-400 hover:text-white whitespace-nowrap flex items-center justify-center gap-1 transition">
+            <i data-lucide="fingerprint" class="w-3 h-3 text-rose-400"></i> Voice Cloner
+          </button>
+        </div>
+
+      <!-- AUDIO UPLOAD CONTAINER (FOR REFERENCE / COVER / REPAINT) -->
+      <div id="audioUploadContainer" class="hidden space-y-2.5 p-3.5 rounded-xl bg-purple-950/20 border border-purple-500/25">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <i data-lucide="upload-cloud" class="w-4 h-4 text-purple-400"></i>
+            <span id="audioUploadLabel" class="text-xs font-bold text-slate-200">Reference / Source Audio</span>
+          </div>
+          <span id="audioUploadFilename" class="text-[10px] text-purple-400 font-mono truncate max-w-[160px]"></span>
+        </div>
+
+        <div id="dropZone" onclick="document.getElementById('audioFileInput').click()" class="border-2 border-dashed border-white/10 hover:border-purple-500/60 rounded-xl p-4 flex flex-col items-center justify-center text-center cursor-pointer transition bg-black/30 group">
+          <i data-lucide="file-audio" class="w-6 h-6 text-slate-500 group-hover:text-purple-400 group-hover:scale-110 transition mb-1"></i>
+          <p class="text-xs text-slate-300 font-medium">Drop audio file here or <span class="text-purple-400 underline">browse</span></p>
+          <p class="text-[10px] text-slate-500 mt-0.5">MP3, WAV, FLAC, M4A</p>
+          <input id="audioFileInput" type="file" accept="audio/*" class="hidden" onchange="handleAudioUpload(event)">
+        </div>
+
+        <!-- Mic Recording Button for Drawer Source Audio -->
+        <div class="pt-0.5">
+          <button id="drawerMicBtn" type="button" onclick="toggleDrawerMicRecording()" class="w-full py-2 px-3 rounded-xl text-xs font-semibold bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 border border-purple-500/30 flex items-center justify-center gap-2 transition cursor-pointer">
+            <i data-lucide="mic" class="w-3.5 h-3.5 text-purple-400"></i>
+            <span id="drawerMicBtnText">Record Source Audio with Mic</span>
+          </button>
+        </div>
+
+        <!-- Drawer Active Recording Box -->
+        <div id="drawerRecordingBox" class="hidden p-3 rounded-xl bg-rose-950/40 border border-rose-500/30 space-y-2">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="relative flex h-2.5 w-2.5">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-rose-500"></span>
+              </span>
+              <span class="text-xs font-bold text-rose-300">Recording Live Audio...</span>
+            </div>
+            <span id="drawerRecTimer" class="font-mono text-xs font-bold text-rose-200">00:00</span>
+          </div>
+          <div class="flex items-center justify-end gap-2 pt-1">
+            <button type="button" onclick="cancelDrawerMicRecording()" class="px-2.5 py-1 text-[11px] text-slate-400 hover:text-white transition cursor-pointer">Cancel</button>
+            <button type="button" onclick="stopDrawerMicRecording()" class="px-3 py-1 rounded-lg text-xs font-bold bg-rose-600 hover:bg-rose-500 text-white flex items-center gap-1.5 shadow transition cursor-pointer">
+              <i data-lucide="square" class="w-3 h-3 fill-current"></i> Stop & Use Audio
+            </button>
+          </div>
+        </div>
+
+        <!-- Audio preview player -->
+        <audio id="uploadedAudioPreview" controls class="hidden w-full h-8 mt-1"></audio>
+
+        <!-- Cover Strength slider (shown in Cover mode) -->
+        <div id="coverStrengthSection" class="hidden pt-2 border-t border-white/5">
+          <div class="flex items-center justify-between text-xs mb-1">
+            <span class="text-slate-300 font-medium">Cover Similarity Strength</span>
+            <span id="coverStrengthVal" class="text-purple-400 font-bold">0.6</span>
+          </div>
+          <input id="coverStrengthSlider" type="range" min="0" max="1" step="0.05" value="0.6" oninput="document.getElementById('coverStrengthVal').textContent = this.value" class="w-full accent-purple-500 h-1.5 bg-slate-700 rounded-lg cursor-pointer">
+          <p class="text-[10px] text-slate-500 mt-1">Lower = closer to original melody, Higher = creative reinterpretation</p>
+        </div>
+
+        <!-- Repaint Range sliders (shown in Repaint mode) -->
+        <div id="repaintSection" class="hidden pt-2 border-t border-white/5 space-y-2">
+          <div class="grid grid-cols-2 gap-2 text-xs">
+            <div>
+              <label class="text-[11px] text-slate-400 block mb-1">Repaint Start (sec)</label>
+              <input id="repaintStartInput" type="number" step="0.5" value="0.0" class="w-full bg-brandDark border border-white/10 rounded-lg px-2.5 py-1.5 text-slate-200 outline-none focus:border-purple-500">
+            </div>
+            <div>
+              <label class="text-[11px] text-slate-400 block mb-1">Repaint End (sec)</label>
+              <input id="repaintEndInput" type="number" step="0.5" placeholder="End of file" class="w-full bg-brandDark border border-white/10 rounded-lg px-2.5 py-1.5 text-slate-200 outline-none focus:border-purple-500">
+            </div>
+          </div>
+          <div class="flex items-center justify-between text-xs">
+            <span class="text-slate-400">Repaint Mode</span>
+            <select id="repaintModeSelect" class="bg-brandDark border border-white/10 rounded-lg px-2 py-1 text-slate-200 outline-none text-xs">
+              <option value="balanced" selected>Balanced (Recommended)</option>
+              <option value="conservative">Conservative</option>
+              <option value="aggressive">Aggressive (Pure Diffusion)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- LYRICS SECTION (Shown in Custom & Cover Modes - Collapsible Accordion Header) -->
+      <div id="lyricsSection" class="space-y-2">
+        <details id="lyricsAccordion" open class="group suno-accordion">
+          <summary class="cursor-pointer flex items-center justify-between list-none py-1 select-none">
+            <div class="flex items-center gap-2">
+              <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 transition-transform duration-200 group-open:rotate-0 -rotate-90"></i>
+              <label class="text-xs font-bold uppercase tracking-wider text-slate-200 hover:text-white cursor-pointer">Lyrics</label>
+              <span class="text-[11px] text-slate-500 hidden sm:inline">(Supports Hindi, English, Punjabi)</span>
+            </div>
+            <div class="flex items-center gap-2" onclick="event.stopPropagation()">
+              <button type="button" onclick="enhanceLyricsStructure()" class="text-[11px] text-purple-400 hover:text-purple-300 transition flex items-center gap-1 font-medium" title="Format lyrics into structured verse/chorus tags">
+                <i data-lucide="wand-2" class="w-3 h-3"></i> Format Tags
+              </button>
+              <span class="text-slate-600">|</span>
+              <button type="button" onclick="clearLyrics()" class="text-[11px] text-slate-400 hover:text-rose-400 transition">Clear</button>
+            </div>
+          </summary>
+
+          <div class="pt-2 space-y-2">
+            <!-- Quick Section Insert Tags -->
+            <div class="flex flex-wrap gap-1.5 pb-1">
+              <button type="button" onclick="insertTag('[INTRO]')" class="text-[11px] px-2 py-1 rounded bg-white/5 hover:bg-white/10 text-slate-300 transition font-mono">[Intro]</button>
+              <button type="button" onclick="insertTag('[VERSE]')" class="text-[11px] px-2 py-1 rounded bg-white/5 hover:bg-white/10 text-slate-300 transition font-mono">[Verse]</button>
+              <button type="button" onclick="insertTag('[CHORUS]')" class="text-[11px] px-2 py-1 rounded bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 transition font-mono font-semibold">[Chorus]</button>
+              <button type="button" onclick="insertTag('[DROP]')" class="text-[11px] px-2 py-1 rounded bg-pink-500/20 hover:bg-pink-500/30 text-pink-300 transition font-mono font-semibold">[Drop]</button>
+              <button type="button" onclick="insertTag('[BRIDGE]')" class="text-[11px] px-2 py-1 rounded bg-white/5 hover:bg-white/10 text-slate-300 transition font-mono">[Bridge]</button>
+              <button type="button" onclick="insertTag('[OUTRO]')" class="text-[11px] px-2 py-1 rounded bg-white/5 hover:bg-white/10 text-slate-300 transition font-mono">[Outro]</button>
+            </div>
+
+            <!-- Lyrics Textarea (Matching Suno Placeholder) -->
+            <div class="relative">
+              <textarea id="lyricsInput" rows="6" placeholder="[Verse]&#10;Write your lyrics here&#10;Every line you add is a line we sing" 
+                class="w-full rounded-xl bg-brandDark/90 border border-white/10 p-3 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-purple-500 transition font-mono resize-y"></textarea>
+            </div>
+          </div>
+        </details>
+      </div>
+
+      <!-- SIMPLE MODE DESCRIPTION (Shown when Simple Mode is selected) -->
+      <div id="simpleModeSection" class="hidden space-y-2">
+        <label class="text-xs font-bold uppercase tracking-wider text-slate-300">Song Description</label>
+        <textarea id="simpleDescInput" rows="4" placeholder="Describe the song you want to create (e.g. An energetic aggressive Hindi rap with hard-hitting 808 bass and an anthem chorus)..."
+          class="w-full rounded-xl bg-brandDark/90 border border-white/10 p-3 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-purple-500 transition resize-none"></textarea>
+      </div>
+
+      <!-- DIALOGUE & VOICE LAB SECTION (Shown when Dialogue & Voice Mode is selected) -->
+      <div id="dialogueModeSection" class="hidden space-y-3.5">
+        
+        <!-- Voice Character Selector Card -->
+        <div class="space-y-2.5 p-3.5 rounded-xl bg-gradient-to-br from-amber-500/10 via-brandDark/90 to-purple-500/10 border border-amber-500/30">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <i data-lucide="mic-2" class="w-4 h-4 text-amber-400"></i>
+              <label class="text-[11px] font-bold uppercase tracking-wider text-slate-200">Dialogue Voice Artist</label>
+            </div>
+            <span id="activeDialogueVoiceBadge" class="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300 font-semibold border border-amber-500/30">🇮🇳 Hindi Male</span>
+          </div>
+
+          <select id="dialogueVoiceSelect" onchange="handleDialogueVoiceChange(this.value)" class="w-full bg-brandDark border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 outline-none focus:border-amber-500 transition font-medium cursor-pointer">
+            <!-- Populated via API -->
+          </select>
+
+          <div class="flex items-center justify-between gap-2 pt-1">
+            <button id="auditionVoiceBtn" onclick="auditionCurrentVoice()" class="text-xs text-amber-400 hover:text-amber-300 flex items-center gap-1.5 font-semibold transition px-2.5 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 cursor-pointer">
+              <i data-lucide="volume-2" class="w-3.5 h-3.5"></i> Audition Voice
+            </button>
+            <div class="flex items-center gap-1.5">
+              <button onclick="openCreateVoiceModal(true)" class="text-xs text-rose-400 hover:text-rose-300 flex items-center gap-1 font-semibold transition px-2.5 py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 cursor-pointer" title="Record your voice sample via microphone">
+                <i data-lucide="mic" class="w-3.5 h-3.5"></i> Record Mic
+              </button>
+              <button onclick="openCreateVoiceModal(false)" class="text-xs text-purple-400 hover:text-purple-300 flex items-center gap-1 font-semibold transition px-2.5 py-1.5 rounded-lg bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/20 cursor-pointer">
+                <i data-lucide="user-plus" class="w-3.5 h-3.5"></i> + Create Voice
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dialogue Script Section -->
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <label class="text-xs font-bold uppercase tracking-wider text-slate-300">Dialogue / Script Text</label>
+            <div class="flex items-center gap-2">
+              <span id="dialogueCharCount" class="text-[11px] text-slate-500 font-mono">0 chars</span>
+              <span class="text-slate-600">|</span>
+              <button onclick="document.getElementById('dialogueScriptInput').value=''; updateDialogueCharCount();" class="text-[11px] text-slate-400 hover:text-rose-400 transition">Clear</button>
+            </div>
+          </div>
+
+          <!-- Quick Emotion / Expression Tag Chips -->
+          <div class="flex flex-wrap gap-1.5 pb-1">
+            <button onclick="insertDialogueEmotion('[Aggressive] ')" class="text-[11px] px-2 py-0.5 rounded bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 transition font-medium">🔥 Aggressive</button>
+            <button onclick="insertDialogueEmotion('[Dramatic] ')" class="text-[11px] px-2 py-0.5 rounded bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 transition font-medium">🎬 Dramatic</button>
+            <button onclick="insertDialogueEmotion('[Whisper] ')" class="text-[11px] px-2 py-0.5 rounded bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 transition font-medium">🤫 Whisper</button>
+            <button onclick="insertDialogueEmotion('[Heroic] ')" class="text-[11px] px-2 py-0.5 rounded bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 transition font-medium">🛡️ Heroic</button>
+            <button onclick="insertDialogueEmotion('[Soulful] ')" class="text-[11px] px-2 py-0.5 rounded bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 transition font-medium">🌙 Soulful</button>
+            <button onclick="insertDialogueEmotion('[Narrator] ')" class="text-[11px] px-2 py-0.5 rounded bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 transition font-medium">🎙️ Narrator</button>
+          </div>
+
+          <textarea id="dialogueScriptInput" oninput="updateDialogueCharCount()" rows="5" placeholder="Yahan apna dialogue ya script likhein (Hindi, English, Hinglish supported)...&#10;Example: पीठ दिखाकर गए थे, अब सामने क्यों आए? जब डूब रहा था मैं, तुम हाथ क्यों ना बढ़ाए? याद रखना... अब मेरी बारी है!"
+            class="w-full rounded-xl bg-brandDark/90 border border-white/10 p-3.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-500 transition leading-relaxed"></textarea>
+
+          <!-- Preset Dialogue Templates -->
+          <div class="flex items-center gap-1.5 overflow-x-auto py-1">
+            <span class="text-[10px] text-slate-500 uppercase font-bold shrink-0">Sample Scripts:</span>
+            <button onclick="loadDialogueTemplate('rap_dialogue')" class="text-[10px] px-2 py-0.5 rounded-full bg-white/5 hover:bg-white/10 text-slate-300 whitespace-nowrap transition cursor-pointer">Desi Rap Intro</button>
+            <button onclick="loadDialogueTemplate('movie_monologue')" class="text-[10px] px-2 py-0.5 rounded-full bg-white/5 hover:bg-white/10 text-slate-300 whitespace-nowrap transition cursor-pointer">Movie Monologue</button>
+            <button onclick="loadDialogueTemplate('trailer_narrator')" class="text-[10px] px-2 py-0.5 rounded-full bg-white/5 hover:bg-white/10 text-slate-300 whitespace-nowrap transition cursor-pointer">Epic Trailer</button>
+            <button onclick="loadDialogueTemplate('podcast_host')" class="text-[10px] px-2 py-0.5 rounded-full bg-white/5 hover:bg-white/10 text-slate-300 whitespace-nowrap transition cursor-pointer">Podcast Intro</button>
+          </div>
+        </div>
+
+        <!-- Dialogue Scene Title -->
+        <div class="space-y-1.5">
+          <label class="text-xs font-bold uppercase tracking-wider text-slate-300">Scene / Audio Title</label>
+          <input id="dialogueTitleInput" type="text" placeholder="Title (e.g. Hero Entry Dialogue)" 
+            class="w-full rounded-xl bg-brandDark/90 border border-white/10 px-3.5 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-500 transition">
+        </div>
+
+        <!-- Voice Speech & Pitch Tuning (Accordion) -->
+        <details class="group bg-brandDark/50 rounded-xl border border-white/10 overflow-hidden">
+          <summary class="p-3 cursor-pointer text-xs font-bold text-slate-300 hover:text-white flex items-center justify-between list-none transition select-none">
+            <div class="flex items-center gap-2">
+              <i data-lucide="sliders" class="w-3.5 h-3.5 text-amber-400"></i>
+              <span class="text-[11px] font-extrabold uppercase">Speech Rate & Pitch Tuning</span>
+            </div>
+            <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 transition-transform duration-200 group-open:rotate-180"></i>
+          </summary>
+          <div class="p-3.5 pt-1 space-y-3 border-t border-white/5">
+            <!-- Speed -->
+            <div class="flex items-center justify-between text-xs">
+              <span class="text-slate-300 font-medium">Speech Speed (Rate)</span>
+              <span id="dialogueSpeedVal" class="text-amber-400 font-bold font-mono">1.0x</span>
+            </div>
+            <input id="dialogueSpeedSlider" type="range" min="0.7" max="1.5" step="0.05" value="1.0" oninput="updateDialogueSpeed(this.value)" class="w-full accent-amber-500 h-1.5 bg-slate-700 rounded-lg cursor-pointer">
+            
+            <!-- Pitch -->
+            <div class="flex items-center justify-between text-xs pt-1">
+              <span class="text-slate-300 font-medium">Voice Pitch (Tone)</span>
+              <span id="dialoguePitchVal" class="text-amber-400 font-bold font-mono">0 Hz (Normal)</span>
+            </div>
+            <input id="dialoguePitchSlider" type="range" min="-20" max="20" step="2" value="0" oninput="updateDialoguePitch(this.value)" class="w-full accent-amber-500 h-1.5 bg-slate-700 rounded-lg cursor-pointer">
+            <div class="flex justify-between text-[10px] text-slate-500">
+              <span>Deep Baritone (-20Hz)</span>
+              <span>Natural</span>
+              <span>Bright (+20Hz)</span>
+            </div>
+          </div>
+        </details>
+      </div>
+
+      <!-- VOICE CLONER LAB SECTION (Shown when Voice Cloner Mode is selected) -->
+      <div id="clonerModeSection" class="hidden space-y-4">
+        <!-- Cloner Banner -->
+        <div class="p-3.5 rounded-xl bg-gradient-to-r from-rose-950/40 via-purple-950/30 to-brandDark border border-rose-500/30 space-y-1">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <i data-lucide="fingerprint" class="w-4 h-4 text-rose-400"></i>
+              <span class="text-xs font-bold text-white uppercase tracking-wider">AI Voice Cloner & Timbre Studio</span>
+            </div>
+            <span class="text-[10px] px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 font-semibold border border-rose-500/30">Zero-Shot AI</span>
+          </div>
+          <p class="text-[11px] text-slate-400 leading-relaxed">
+            Record a short 5–10s audio clip with your microphone or upload any audio sample to extract vocal timbre, pitch & character.
+          </p>
+        </div>
+
+        <!-- Voice Name Input -->
+        <div class="space-y-1.5">
+          <label class="text-xs font-bold uppercase tracking-wider text-slate-300">Voice Character Name *</label>
+          <input id="drawerVoiceNameInput" type="text" placeholder="e.g. Shahid Cloned Voice or Vikram Action Baritone"
+            class="w-full rounded-xl bg-brandDark/90 border border-white/10 px-3.5 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-rose-500 transition">
+        </div>
+
+        <!-- Gender & Base Neural Voice -->
+        <div class="grid grid-cols-2 gap-3">
+          <div class="space-y-1">
+            <label class="text-[11px] font-semibold text-slate-400">Gender</label>
+            <select id="drawerVoiceGenderSelect" class="w-full bg-brandDark border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 outline-none focus:border-rose-500">
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+            </select>
+          </div>
+          <div class="space-y-1">
+            <label class="text-[11px] font-semibold text-slate-400">Base Neural Voice</label>
+            <select id="drawerVoiceBaseSelect" class="w-full bg-brandDark border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 outline-none focus:border-rose-500">
+              <option value="hi-IN-MadhurNeural">Madhur (Hindi Male)</option>
+              <option value="hi-IN-SwaraNeural">Swara (Hindi Female)</option>
+              <option value="en-IN-PrabhatNeural">Prabhat (Indian Eng Male)</option>
+              <option value="en-IN-NeerjaNeural">Neerja (Indian Eng Female)</option>
+              <option value="en-US-ChristopherNeural">Christopher (Narrator Male)</option>
+              <option value="en-US-JennyNeural">Jenny (US Female)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Audio Sample Source (Mic or File) -->
+        <div class="space-y-2.5 p-3.5 rounded-xl bg-brandDark/60 border border-white/10">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-1.5">
+              <i data-lucide="mic" class="w-3.5 h-3.5 text-rose-400"></i>
+              <span class="text-xs font-bold text-slate-200">Voice Audio Sample (5–10s)</span>
+            </div>
+            <span id="drawerClonerFilename" class="text-[10px] text-rose-400 font-mono font-semibold truncate max-w-[150px]"></span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <button id="drawerClonerMicBtn" type="button" onclick="toggleDrawerClonerMic()" class="py-2.5 px-3 rounded-xl text-xs font-bold bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 flex items-center justify-center gap-2 transition cursor-pointer">
+              <i data-lucide="mic" class="w-4 h-4"></i>
+              <span id="drawerClonerMicBtnText">Record Voice</span>
+            </button>
+            <button type="button" onclick="document.getElementById('drawerClonerFileInput').click()" class="py-2.5 px-3 rounded-xl text-xs font-bold bg-white/5 hover:bg-white/10 text-slate-200 border border-white/10 flex items-center justify-center gap-2 transition cursor-pointer">
+              <i data-lucide="upload" class="w-4 h-4 text-purple-400"></i>
+              <span>Upload Sample</span>
+            </button>
+            <input id="drawerClonerFileInput" type="file" accept="audio/*" onchange="handleDrawerClonerUpload(event)" class="hidden">
+          </div>
+
+          <!-- Pulsing Recording VU Meter Box -->
+          <div id="drawerClonerRecBox" class="hidden p-3 rounded-xl bg-rose-950/50 border border-rose-500/40 space-y-2">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="relative flex h-2.5 w-2.5">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-rose-500"></span>
+                </span>
+                <span class="text-xs font-bold text-rose-300">Recording Live Voice...</span>
+              </div>
+              <span id="drawerClonerRecTimer" class="font-mono text-xs font-bold text-rose-200">00:00 / 00:15</span>
+            </div>
+
+            <div class="flex items-center justify-center gap-1.5 h-6 py-1">
+              <span class="rec-bar bg-rose-400 w-1 rounded-full animate-bounce" style="height: 14px; animation-delay: 0.1s;"></span>
+              <span class="rec-bar bg-rose-400 w-1 rounded-full animate-bounce" style="height: 22px; animation-delay: 0.25s;"></span>
+              <span class="rec-bar bg-rose-400 w-1 rounded-full animate-bounce" style="height: 10px; animation-delay: 0.15s;"></span>
+              <span class="rec-bar bg-rose-400 w-1 rounded-full animate-bounce" style="height: 24px; animation-delay: 0.3s;"></span>
+              <span class="rec-bar bg-rose-400 w-1 rounded-full animate-bounce" style="height: 18px; animation-delay: 0.05s;"></span>
+              <span class="rec-bar bg-rose-400 w-1 rounded-full animate-bounce" style="height: 26px; animation-delay: 0.2s;"></span>
+              <span class="rec-bar bg-rose-400 w-1 rounded-full animate-bounce" style="height: 12px; animation-delay: 0.35s;"></span>
+            </div>
+
+            <div class="flex items-center justify-end gap-2 pt-1">
+              <button type="button" onclick="cancelDrawerClonerMic()" class="px-2.5 py-1 text-[11px] text-slate-400 hover:text-white transition cursor-pointer">Cancel</button>
+              <button type="button" onclick="stopDrawerClonerMic()" class="px-3 py-1 rounded-lg text-xs font-bold bg-rose-600 hover:bg-rose-500 text-white flex items-center gap-1.5 shadow transition cursor-pointer">
+                <i data-lucide="square" class="w-3 h-3 fill-current"></i> Stop & Save Audio
+              </button>
+            </div>
+          </div>
+
+          <!-- Preview Player Box -->
+          <div id="drawerClonerPreviewBox" class="hidden p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/30 space-y-1.5">
+            <div class="flex items-center justify-between text-[11px]">
+              <span class="text-rose-300 font-semibold flex items-center gap-1">
+                <i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-rose-400"></i> Sample Audio Ready
+              </span>
+              <button type="button" onclick="discardDrawerClonerAudio()" class="text-slate-400 hover:text-rose-400 text-[10px] flex items-center gap-1 transition cursor-pointer">
+                <i data-lucide="trash-2" class="w-3 h-3"></i> Remove
+              </button>
+            </div>
+            <audio id="drawerClonerAudioPlayer" controls class="w-full h-8 rounded-lg outline-none"></audio>
+          </div>
+        </div>
+
+        <!-- Pitch & Pace Sliders -->
+        <div class="space-y-3 p-3.5 rounded-xl bg-brandDark/40 border border-white/5">
+          <div>
+            <div class="flex items-center justify-between text-xs mb-1">
+              <span class="text-slate-300 font-medium">Timbre Pitch Tuning</span>
+              <span id="drawerClonerPitchVal" class="text-rose-400 font-bold font-mono">0 Hz (Natural)</span>
+            </div>
+            <select id="drawerVoicePitchSelect" class="w-full bg-brandDark border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-200 outline-none focus:border-rose-500">
+              <option value="-15Hz">Heavy / Deep Hero (-15Hz)</option>
+              <option value="-8Hz">Warm Baritone (-8Hz)</option>
+              <option value="+0Hz" selected>Natural (+0Hz)</option>
+              <option value="+8Hz">Crisp Youth (+8Hz)</option>
+              <option value="+15Hz">High Pitch (+15Hz)</option>
+            </select>
+          </div>
+          <div>
+            <div class="flex items-center justify-between text-xs mb-1">
+              <span class="text-slate-300 font-medium">Speaking Pace</span>
+              <span id="drawerClonerRateVal" class="text-rose-400 font-bold font-mono">Normal (1.0x)</span>
+            </div>
+            <select id="drawerVoiceRateSelect" class="w-full bg-brandDark border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-200 outline-none focus:border-rose-500">
+              <option value="-10%">Dramatic Slow (-10%)</option>
+              <option value="+0%" selected>Normal Pace (+0%)</option>
+              <option value="+10%">Fast / Energetic (+10%)</option>
+              <option value="+20%">Rapid Fire (+20%)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Save Cloned Voice Button -->
+        <div class="pt-1">
+          <button type="button" onclick="saveDrawerCustomVoice()" class="btn-suno w-full py-3.5 text-base font-bold shadow-lg shadow-rose-950/40 bg-gradient-to-r from-rose-500 via-pink-600 to-purple-600 hover:brightness-110 flex items-center justify-center gap-2 transition cursor-pointer">
+            <i data-lucide="check" class="w-5 h-5"></i>
+            <span>Save & Register to Custom Voices</span>
+          </button>
+        </div>
+
+        <!-- BATCH / BULK MULTIPLE VOICES IMPORT -->
+        <div class="pt-4 border-t border-white/10 space-y-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <i data-lucide="layers" class="w-4 h-4 text-cyan-400"></i>
+              <span class="text-xs font-bold text-white uppercase tracking-wider">Bulk Voice Import (Multiple Files)</span>
+            </div>
+            <span class="text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 font-semibold border border-cyan-500/30">Auto-Naming</span>
+          </div>
+          <p class="text-[11px] text-slate-400 leading-relaxed">
+            Internet se download ki hui sabhi sample audios ko ek sath select ya drop karein. File ka jo naam hoga (e.g. <code>Amitabh_Bachchan.mp3</code>), usi naam se automatically nayi voice create ho jayegi!
+          </p>
+
+          <!-- Dropzone for Multiple Audios -->
+          <div id="batchDropZone" onclick="document.getElementById('batchVoiceInput').click()" class="border-2 border-dashed border-white/10 hover:border-cyan-500/60 rounded-xl p-4 flex flex-col items-center justify-center text-center cursor-pointer transition bg-black/40 group">
+            <i data-lucide="folder-archive" class="w-6 h-6 text-slate-500 group-hover:text-cyan-400 group-hover:scale-110 transition mb-1.5"></i>
+            <p class="text-xs text-slate-200 font-medium">Click to select multiple audio files or drop them here</p>
+            <p class="text-[10px] text-slate-500 mt-0.5">MP3, WAV, FLAC, M4A (Select as many as you want)</p>
+            <input id="batchVoiceInput" type="file" multiple accept="audio/*" onchange="handleBatchVoiceSelection(event)" class="hidden">
+          </div>
+
+          <!-- Selected Files Tag Cloud & Status -->
+          <div id="batchSelectedBox" class="hidden p-3 rounded-xl bg-cyan-950/30 border border-cyan-500/30 space-y-2">
+            <div class="flex items-center justify-between text-xs">
+              <span id="batchSelectedCount" class="text-cyan-300 font-semibold">0 files selected</span>
+              <button type="button" onclick="clearBatchSelectedFiles()" class="text-[11px] text-slate-400 hover:text-rose-400 transition cursor-pointer">Clear</button>
+            </div>
+            <div id="batchFilesPreviewList" class="flex flex-wrap gap-1.5 max-h-28 overflow-y-auto pr-1"></div>
+            <button id="batchImportBtn" type="button" onclick="uploadAndRegisterBatchVoices()" class="w-full py-2.5 px-3 rounded-xl text-xs font-bold bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white shadow-lg flex items-center justify-center gap-2 transition cursor-pointer">
+              <i data-lucide="upload-cloud" class="w-4 h-4"></i>
+              <span>Import & Register All Voices</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- MUSIC CREATION SPECIFIC SECTIONS -->
+      <div id="musicCreationSections" class="space-y-4">
+        <!-- STYLE OF MUSIC / TAGS (Collapsible Accordion Header matching Suno) -->
+        <div id="styleSection" class="space-y-2">
+          <details id="styleAccordion" open class="group suno-accordion">
+            <summary class="cursor-pointer flex items-center justify-between list-none py-1 select-none">
+              <div class="flex items-center gap-2">
+                <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 transition-transform duration-200 group-open:rotate-0 -rotate-90"></i>
+                <label class="text-xs font-bold uppercase tracking-wider text-slate-200 hover:text-white cursor-pointer">Style of Music</label>
+              </div>
+              <div class="flex items-center gap-2" onclick="event.stopPropagation()">
+                <button type="button" onclick="enhanceStylePrompt()" class="text-[11px] text-pink-400 hover:text-pink-300 transition flex items-center gap-1 font-medium" title="Expand style into studio production keywords">
+                  <i data-lucide="wand-2" class="w-3 h-3"></i> Enhance Style
+                </button>
+                <span class="text-slate-600">|</span>
+                <button type="button" onclick="randomizeStyle()" class="text-[11px] text-purple-400 hover:text-purple-300 transition flex items-center gap-1 font-medium">
+                  <i data-lucide="dice-5" class="w-3 h-3"></i> Surprise Me
+                </button>
+              </div>
+            </summary>
+
+            <div class="pt-2 space-y-2">
+              <input id="styleInput" type="text" placeholder="Enter styles (e.g. Aggressive Hardcore Rap, 808 Bass, Dark Trap, 130 BPM)" 
+                class="w-full rounded-xl bg-brandDark/90 border border-white/10 px-3.5 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-purple-500 transition">
+
+              <!-- Clickable Style Tag Pills -->
+              <div class="flex flex-wrap gap-1.5 pt-1">
+                <span onclick="appendStyle('Hardcore Rap')" class="tag-pill">🔥 Hardcore Rap</span>
+                <span onclick="appendStyle('Heavy 808 Bass')" class="tag-pill">🔊 Heavy 808</span>
+                <span onclick="appendStyle('Bollywood Dance')" class="tag-pill">🇮🇳 Bollywood</span>
+                <span onclick="appendStyle('Punjabi Drill')" class="tag-pill">🥁 Punjabi Drill</span>
+                <span onclick="appendStyle('Lo-Fi Hip Hop')" class="tag-pill">☕ Lo-Fi Chill</span>
+                <span onclick="appendStyle('EDM Anthem')" class="tag-pill">⚡ EDM Drop</span>
+                <span onclick="appendStyle('Acoustic Guitar')" class="tag-pill">🎸 Acoustic</span>
+                <span onclick="appendStyle('Ghazal Soul')" class="tag-pill">🌙 Ghazal</span>
+              </div>
+            </div>
+          </details>
+        </div>
+
+      <!-- TITLE INPUT -->
+      <div class="space-y-1.5">
+        <label class="text-xs font-bold uppercase tracking-wider text-slate-300">Title</label>
+        <input id="titleInput" type="text" placeholder="Name your track (e.g. Ab Meri Baari Hai)" 
+          class="w-full rounded-xl bg-brandDark/90 border border-white/10 px-3.5 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition">
+      </div>
+
+      <!-- VOCAL & GENERATION TUNING DROPDOWN (Collapsible Accordion) -->
+      <details class="group bg-brandDark/50 rounded-xl border border-white/10 overflow-hidden">
+        <summary class="p-3.5 cursor-pointer text-xs font-bold text-slate-200 hover:text-white flex items-center justify-between list-none transition select-none">
+          <div class="flex items-center gap-2">
+            <i data-lucide="sliders-horizontal" class="w-4 h-4 text-cyan-400"></i>
+            <span class="tracking-wider uppercase text-[11px] font-extrabold">Vocal & Generation Tuning</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span id="tuningSummaryBadge" class="text-[10px] text-slate-400 font-mono hidden sm:inline">Auto • 50% Style</span>
+            <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 transition-transform duration-200 group-open:rotate-180"></i>
+          </div>
+        </summary>
+
+        <div class="p-3.5 pt-1 space-y-3 border-t border-white/5">
+          <!-- Voice Artist & Persona -->
+          <div class="space-y-2 p-3 rounded-xl bg-brandDark/70 border border-white/10">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <i data-lucide="mic" class="w-3.5 h-3.5 text-cyan-400"></i>
+                <label class="text-[11px] font-bold uppercase tracking-wider text-slate-300">Voice Artist & Persona</label>
+              </div>
+              <span id="activeArtistBadge" class="text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-300 font-semibold border border-cyan-500/30">Auto AI</span>
+            </div>
+
+            <select id="voiceArtistSelect" onchange="handleVoiceArtistChange(this.value)" class="w-full bg-brandSurface border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 outline-none focus:border-cyan-500 transition font-medium cursor-pointer">
+              <option value="auto">🌟 Auto (Model Natural Voice Selection)</option>
+              <option value="bollywood_male_romantic">🎤 Bollywood Male Romantic (Arijit Style — Soulful, Emotional Chest Voice)</option>
+              <option value="desi_hardcore_rap">🔥 Desi Hardcore Rap Baritone (Divine Style — Aggressive, Punchy Hindi Flow)</option>
+              <option value="punjabi_power_male">🌾 Punjabi Folk Power Male (Diljit Style — High Energy, Resonant Vibrato)</option>
+              <option value="bollywood_nightingale">🌙 Bollywood Nightingale Female (Shreya Style — Silky Smooth, Melodic Classical)</option>
+              <option value="modern_pop_female">💎 Modern Pop / R&B Female (Dua Style — Crisp, Bright Radio Vocal Timbre)</option>
+              <option value="indie_acoustic_singer">🎸 Acoustic Indie Singer-Songwriter (Intimate, Gentle Breathy Tone)</option>
+              <option value="sufi_ghazal_master">🌙 Sufi / Ghazal Maestro (Rahat Style — Spiritual Resonant Nuances)</option>
+              <option value="custom">✍️ Custom Voice Prompt Persona</option>
+            </select>
+            
+            <input id="customVoiceInput" type="text" placeholder="Describe custom vocal timbre (e.g. Deep raspy blues baritone, smoky jazz delivery)..." 
+              class="hidden w-full bg-brandSurface border border-white/10 rounded-xl px-3 py-1.5 text-xs text-slate-100 placeholder-slate-500 outline-none focus:border-cyan-500">
+          </div>
+
+          <!-- 1. Vocal Gender -->
+          <div class="ps-control-row">
+            <div class="flex items-center gap-1.5">
+              <span class="text-xs font-semibold text-slate-200">Vocal Gender</span>
+              <span title="Select preferred vocal timbre: Male, Female, or Auto" class="cursor-pointer text-slate-500 hover:text-slate-300">
+                <i data-lucide="info" class="w-3.5 h-3.5"></i>
+              </span>
+            </div>
+            <div class="ps-segmented-group">
+              <button type="button" id="genderAutoBtn" onclick="setVocalGender('auto')" class="ps-segmented-btn active">Auto</button>
+              <button type="button" id="genderMaleBtn" onclick="setVocalGender('male')" class="ps-segmented-btn">Male</button>
+              <button type="button" id="genderFemaleBtn" onclick="setVocalGender('female')" class="ps-segmented-btn">Female</button>
+            </div>
+          </div>
+
+          <!-- 2. Duration Mode -->
+          <div class="ps-control-row">
+            <div class="flex items-center gap-1.5">
+              <span class="text-xs font-semibold text-slate-200">Duration</span>
+              <span title="Auto optimizes song length based on lyrics; Custom allows manual slider duration" class="cursor-pointer text-slate-500 hover:text-slate-300">
+                <i data-lucide="info" class="w-3.5 h-3.5"></i>
+              </span>
+            </div>
+            <div class="ps-segmented-group">
+              <button type="button" id="durCustomBtn" onclick="setDurationMode('custom')" class="ps-segmented-btn">Custom</button>
+              <button type="button" id="durAutoBtn" onclick="setDurationMode('auto')" class="ps-segmented-btn active">Auto</button>
+            </div>
+          </div>
+
+          <!-- Custom Duration Slider (Revealed if Custom Duration is selected) -->
+          <div id="customDurationSection" class="hidden p-3 rounded-xl bg-brandDark/80 border border-white/5 space-y-1.5">
+            <div class="flex items-center justify-between text-xs">
+              <span class="text-slate-300 font-medium">Custom Length</span>
+              <span id="durationValLabel" class="text-cyan-400 font-bold font-mono">60s</span>
+            </div>
+            <input id="durationSlider" type="range" min="30" max="240" step="10" value="60" oninput="updateDurationLabel(this.value)" class="w-full accent-cyan-500 h-1.5 bg-slate-700 rounded-lg cursor-pointer">
+          </div>
+
+          <!-- 3. Max Mode -->
+          <div class="ps-control-row">
+            <div class="flex items-center gap-1.5">
+              <span class="text-xs font-semibold text-slate-200">Max Mode</span>
+              <span title="Maximum diffusion refinement (16-20 steps) for highest audio fidelity" class="cursor-pointer text-slate-500 hover:text-slate-300">
+                <i data-lucide="info" class="w-3.5 h-3.5"></i>
+              </span>
+            </div>
+            <div class="ps-segmented-group">
+              <button type="button" id="maxModeOffBtn" onclick="setMaxMode(false)" class="ps-segmented-btn active">Off</button>
+              <button type="button" id="maxModeOnBtn" onclick="setMaxMode(true)" class="ps-segmented-btn">On</button>
+            </div>
+          </div>
+
+          <!-- 4. Weirdness Slider -->
+          <div class="ps-control-row">
+            <div class="flex items-center gap-1.5">
+              <span class="text-xs font-semibold text-slate-200">Weirdness</span>
+              <span title="Controls harmonic unpredictability and creative experimental flow" class="cursor-pointer text-slate-500 hover:text-slate-300">
+                <i data-lucide="info" class="w-3.5 h-3.5"></i>
+              </span>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="notched-slider-wrap">
+                <div class="notched-track-ticks">
+                  <span class="notched-tick"></span>
+                  <span class="notched-tick"></span>
+                  <span class="notched-tick"></span>
+                  <span class="notched-tick"></span>
+                  <span class="notched-tick"></span>
+                  <span class="notched-tick"></span>
+                  <span class="notched-tick"></span>
+                  <span class="notched-tick"></span>
+                  <span class="notched-tick"></span>
+                  <span class="notched-tick"></span>
+                  <span class="notched-tick"></span>
+                </div>
+                <input id="weirdnessSlider" type="range" min="0" max="100" value="50" step="5" oninput="updateWeirdness(this.value)" class="notched-range">
+              </div>
+              <span id="weirdnessVal" class="text-xs font-bold text-slate-200 w-9 text-right font-mono">50%</span>
+            </div>
+          </div>
+
+          <!-- 5. Style Influence Slider -->
+          <div class="ps-control-row">
+            <div class="flex items-center gap-1.5">
+              <span class="text-xs font-semibold text-slate-200">Style Influence</span>
+              <span title="Controls how strictly the generation adheres to the style prompt" class="cursor-pointer text-slate-500 hover:text-slate-300">
+                <i data-lucide="info" class="w-3.5 h-3.5"></i>
+              </span>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="notched-slider-wrap">
+                <div class="notched-track-ticks">
+                  <span class="notched-tick"></span>
+                  <span class="notched-tick"></span>
+                  <span class="notched-tick"></span>
+                  <span class="notched-tick"></span>
+                  <span class="notched-tick"></span>
+                  <span class="notched-tick"></span>
+                  <span class="notched-tick"></span>
+                  <span class="notched-tick"></span>
+                  <span class="notched-tick"></span>
+                  <span class="notched-tick"></span>
+                  <span class="notched-tick"></span>
+                </div>
+                <input id="styleInfluenceSlider" type="range" min="0" max="100" value="50" step="5" oninput="updateStyleInfluence(this.value)" class="notched-range">
+              </div>
+              <span id="styleInfluenceVal" class="text-xs font-bold text-slate-200 w-9 text-right font-mono">50%</span>
+            </div>
+          </div>
+
+          <!-- 6. Variety Slider -->
+          <div class="ps-control-row">
+            <div class="flex items-center gap-1.5">
+              <span class="text-xs font-semibold text-slate-200">Variety</span>
+              <span title="Controls acoustic variation and dynamic timestep shift" class="cursor-pointer text-slate-500 hover:text-slate-300">
+                <i data-lucide="info" class="w-3.5 h-3.5"></i>
+              </span>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="notched-slider-wrap">
+                <div class="notched-track-ticks">
+                  <span class="notched-tick"></span>
+                  <span class="notched-tick"></span>
+                  <span class="notched-tick"></span>
+                  <span class="notched-tick"></span>
+                  <span class="notched-tick"></span>
+                  <span class="notched-tick"></span>
+                  <span class="notched-tick"></span>
+                  <span class="notched-tick"></span>
+                  <span class="notched-tick"></span>
+                  <span class="notched-tick"></span>
+                  <span class="notched-tick"></span>
+                </div>
+                <input id="varietySlider" type="range" min="0" max="10" value="5" step="1" oninput="updateVariety(this.value)" class="notched-range">
+              </div>
+              <span id="varietyVal" class="text-xs font-bold text-slate-200 w-12 text-right font-semibold">Normal</span>
+            </div>
+          </div>
+
+          <!-- 7. Personalize -->
+          <div class="ps-control-row">
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-semibold text-slate-200">Personalize</span>
+              <span title="Remember your taste in voice artists, genres, and mix preferences" class="cursor-pointer text-slate-500 hover:text-slate-300">
+                <i data-lucide="info" class="w-3.5 h-3.5"></i>
+              </span>
+              <span class="text-[11px] text-slate-400 font-medium">My taste</span>
+            </div>
+            <div class="ps-segmented-group">
+              <button type="button" id="personalizeOffBtn" onclick="setPersonalize(false)" class="ps-segmented-btn active">Off</button>
+              <button type="button" id="personalizeOnBtn" onclick="setPersonalize(true)" class="ps-segmented-btn">On</button>
+            </div>
+          </div>
+        </div>
+      </details>
+
+      <!-- INSTRUMENTAL TOGGLE -->
+      <div class="flex items-center justify-between p-3 rounded-xl bg-brandDark/60 border border-white/10">
+        <div>
+          <div class="text-xs font-bold text-slate-200">Instrumental Track</div>
+          <div class="text-[10px] text-slate-400">Generate pure music with no vocals</div>
+        </div>
+        <input id="instrumentalToggle" type="checkbox" onchange="handleInstrumentalToggle(this.checked)" class="w-4 h-4 rounded text-cyan-500 focus:ring-cyan-500 bg-brandDark border-white/20 cursor-pointer">
+      </div>
+
+      <!-- ADVANCED ACCORDION WITH FULL ACE-STEP PARAMETERS -->
+      <details class="group bg-brandDark/40 rounded-xl border border-white/5 overflow-hidden">
+        <summary class="p-3 cursor-pointer text-xs font-semibold text-slate-400 hover:text-slate-200 flex items-center justify-between list-none">
+          <span class="flex items-center gap-1.5">
+            <i data-lucide="sliders" class="w-3.5 h-3.5 text-purple-400"></i>
+            Advanced Tuning & Audio Engine
+          </span>
+          <i data-lucide="chevron-down" class="w-4 h-4 transition group-open:rotate-180"></i>
+        </summary>
+        <div class="p-3.5 pt-0 space-y-3.5 text-xs">
+          <!-- Tempo & Key -->
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="text-[11px] text-slate-400 block mb-1">Tempo (BPM)</label>
+              <input id="bpmInput" type="number" placeholder="Auto (e.g. 130)" class="w-full bg-brandSurface border border-white/10 rounded-lg px-2.5 py-1.5 text-slate-200 outline-none focus:border-purple-500">
+            </div>
+            <div>
+              <label class="text-[11px] text-slate-400 block mb-1">Musical Key / Scale</label>
+              <input id="keyInput" type="text" placeholder="Auto (e.g. G minor)" class="w-full bg-brandSurface border border-white/10 rounded-lg px-2.5 py-1.5 text-slate-200 outline-none focus:border-purple-500">
+            </div>
+          </div>
+
+          <!-- Inference Steps & CFG Guidance -->
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <div class="flex justify-between mb-1">
+                <label class="text-[11px] text-slate-400">Diffusion Steps</label>
+                <span id="stepsValLabel" class="text-purple-400 font-mono">8</span>
+              </div>
+              <input id="stepsSlider" type="range" min="1" max="20" value="8" oninput="document.getElementById('stepsValLabel').textContent = this.value" class="w-full accent-purple-500 h-1.5 bg-slate-700 rounded-lg cursor-pointer">
+            </div>
+            <div>
+              <div class="flex justify-between mb-1">
+                <label class="text-[11px] text-slate-400">Guidance Scale (CFG)</label>
+                <span id="cfgValLabel" class="text-purple-400 font-mono">7.0</span>
+              </div>
+              <input id="cfgSlider" type="range" min="1" max="15" step="0.5" value="7.0" oninput="document.getElementById('cfgValLabel').textContent = this.value" class="w-full accent-purple-500 h-1.5 bg-slate-700 rounded-lg cursor-pointer">
+            </div>
+          </div>
+
+          <!-- Seed & Timestep Shift -->
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <div class="flex items-center justify-between mb-1">
+                <label class="text-[11px] text-slate-400">Random Seed</label>
+                <input id="randomSeedToggle" type="checkbox" checked onchange="document.getElementById('seedInput').disabled = this.checked" class="w-3.5 h-3.5 text-purple-600 rounded">
+              </div>
+              <input id="seedInput" type="number" placeholder="Random (-1)" disabled class="w-full bg-brandSurface border border-white/10 rounded-lg px-2.5 py-1.5 text-slate-200 outline-none focus:border-purple-500 disabled:opacity-50">
+            </div>
+            <div>
+              <div class="flex justify-between mb-1">
+                <label class="text-[11px] text-slate-400">Timestep Shift</label>
+                <span id="shiftValLabel" class="text-purple-400 font-mono">3.0</span>
+              </div>
+              <input id="shiftSlider" type="range" min="1" max="5" step="0.5" value="3.0" oninput="document.getElementById('shiftValLabel').textContent = this.value" class="w-full accent-purple-500 h-1.5 bg-slate-700 rounded-lg cursor-pointer">
+            </div>
+          </div>
+
+          <!-- Studio Mastering Engine Selector -->
+          <div class="p-3 rounded-xl bg-gradient-to-r from-purple-950/40 via-brandDark to-cyan-950/40 border border-purple-500/25 space-y-1.5">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-400"></i>
+                <label class="text-[11px] font-bold uppercase tracking-wider text-slate-200">Suno Studio Mastering</label>
+              </div>
+              <span class="text-[9px] px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30">320k • -11 LUFS</span>
+            </div>
+            <select id="masteringPresetSelect" class="w-full bg-brandDark border border-white/10 rounded-lg px-2.5 py-1.5 text-slate-200 outline-none text-xs cursor-pointer">
+              <option value="suno_studio" selected>🌟 Suno Studio Master (Balanced, Wide Stereo, Air, -11 LUFS)</option>
+              <option value="bass_club">🔥 Bass Boost & Club Master (Deep 808s, Hard Limiter, -10 LUFS)</option>
+              <option value="vocal_air">🎤 Vocal Clarity & Air (Clean Presence, De-mud, Broadcast -12 LUFS)</option>
+            </select>
+            <p class="text-[10px] text-slate-400">Multi-band parametric EQ, mid-side spatial widening & true-peak limiter.</p>
+          </div>
+
+          <!-- Audio Format & Peak Normalization -->
+          <div class="grid grid-cols-2 gap-3 pt-1 border-t border-white/5">
+            <div>
+              <label class="text-[11px] text-slate-400 block mb-1">Audio Format</label>
+              <select id="audioFormatSelect" class="w-full bg-brandSurface border border-white/10 rounded-lg px-2 py-1.5 text-slate-200 outline-none text-xs">
+                <option value="mp3" selected>MP3 (320 kbps)</option>
+                <option value="wav">WAV (Lossless 48kHz)</option>
+                <option value="flac">FLAC (Lossless)</option>
+              </select>
+            </div>
+            <div>
+              <label class="text-[11px] text-slate-400 block mb-1">Peak Normalization</label>
+              <div class="flex items-center gap-2 mt-1">
+                <input id="normToggle" type="checkbox" checked class="w-4 h-4 text-purple-600 rounded">
+                <span class="text-[11px] text-slate-300">-1.0 dB (Studio Master)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </details>
+      </div> <!-- End musicCreationSections -->
+
+      <!-- PRIMARY SUNO "CREATE" BUTTON -->
+      <div class="pt-2">
+        <button id="createBtn" onclick="triggerCreate()" class="btn-suno w-full py-3.5 text-base font-bold shadow-lg shadow-purple-900/40">
+          <i data-lucide="sparkles" class="w-5 h-5"></i>
+          <span>Create Song</span>
+        </button>
+      </div>
+
+      <!-- PROGRESS INDICATOR (Hidden by default, shown during generation) -->
+      <div id="generationProgressCard" class="hidden p-4 rounded-xl bg-purple-950/20 border border-purple-500/30 space-y-2 animate-fade-in">
+        <div class="flex items-center justify-between text-xs">
+          <div class="flex items-center gap-2 text-purple-300 font-semibold">
+            <span class="loading-ring w-4 h-4"></span>
+            <span id="progressStatusText">Synthesizing audio with DiT Turbo...</span>
+          </div>
+          <span id="progressPercentText" class="font-mono text-purple-400 font-bold">15%</span>
+        </div>
+        <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+          <div id="progressBarFill" class="bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 h-2 rounded-full transition-all duration-300" style="width: 15%"></div>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- COLUMN 3: TRACK FEED & LIBRARY (RIGHT PANEL) -->
+    <section class="flex-1 bg-brandDark flex flex-col overflow-hidden">
+      
+      <!-- Feed Header -->
+      <div class="h-14 border-b border-white/5 px-6 flex items-center justify-between shrink-0">
+        <div class="flex items-center gap-3">
+          <h2 id="feedHeaderTitle" class="text-base font-extrabold tracking-tight text-white">Recent Creations</h2>
+          <span id="totalTracksHeaderBadge" class="text-xs px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-slate-400">0 tracks</span>
+        </div>
+
+        <!-- Filter tabs -->
+        <div class="flex items-center gap-1.5 bg-brandSurface/60 p-1 rounded-lg border border-white/5 text-xs">
+          <button onclick="setFilter('all')" class="feed-filter-btn px-2.5 py-1 rounded-md bg-white/10 text-white font-semibold" data-filter="all">All</button>
+          <button onclick="setFilter('music')" class="feed-filter-btn px-2.5 py-1 rounded-md text-slate-400 hover:text-white" data-filter="music">Music</button>
+          <button onclick="setFilter('dialogue')" class="feed-filter-btn px-2.5 py-1 rounded-md text-slate-400 hover:text-white" data-filter="dialogue">Dialogues</button>
+          <button onclick="setFilter('instrumental')" class="feed-filter-btn px-2.5 py-1 rounded-md text-slate-400 hover:text-white" data-filter="instrumental">Instrumental</button>
+        </div>
+      </div>
+
+      <!-- Scrollable Track List -->
+      <div id="tracksContainer" class="flex-1 overflow-y-auto p-6 space-y-3">
+        <!-- Dynamic Track Cards will be injected here -->
+      </div>
+    </section>
+
+  </div>
+
+  <!-- PERSISTENT SUNO FLOATING BOTTOM AUDIO PLAYER -->
+  <footer id="bottomPlayer" class="h-20 bg-brandNav/90 backdrop-blur-xl border-t border-white/10 px-6 flex items-center justify-between z-30 shrink-0">
+    
+    <!-- Left: Track Details -->
+    <div class="flex items-center gap-3 w-1/4 min-w-[200px]">
+      <div id="playerThumb" class="w-12 h-12 rounded-xl bg-black/60 border border-white/10 flex items-center justify-center shrink-0 shadow-md">
+        <svg viewBox="296 174 156 156" class="w-7 h-7 shrink-0 drop-shadow-[0_0_8px_rgba(0,204,255,0.4)]">
+          <polygon fill="#FF0000" points="350.5 176.52 370.94 176.52 370.94 196.97 350.5 196.97"/>
+          <polygon fill="#00CCFF" points="397.27 176.52 376.83 176.52 376.83 196.97 397.27 196.97"/>
+          <polygon fill="#FF0000" points="345.62 223.29 325.18 223.29 325.18 202.85 345.62 202.85"/>
+          <polygon fill="#E50000" points="350.5 223.29 370.94 223.29 370.94 202.85 350.5 202.85"/>
+          <polygon fill="#00B8F0" points="397.27 223.29 376.83 223.29 376.83 202.85 397.27 202.85"/>
+          <polygon fill="#00CCFF" points="403.15 223.29 423.59 223.29 423.59 202.85 403.15 202.85"/>
+          <polygon fill="#FF0000" points="298.86 229.17 319.3 229.17 319.3 249.61 298.86 249.61"/>
+          <polygon fill="#E50000" points="345.62 229.17 325.18 229.17 325.18 249.61 345.62 249.61"/>
+          <polygon fill="#CF0000" points="350.5 229.17 370.94 229.17 370.94 249.61 350.5 249.61"/>
+          <polygon fill="#0094D6" points="397.27 229.17 376.83 229.17 376.83 249.61 397.27 249.61"/>
+          <polygon fill="#00B8F0" points="403.15 229.17 423.59 229.17 423.59 249.61 403.15 249.61"/>
+          <polygon fill="#00CCFF" points="448.92 229.17 428.47 229.17 428.47 249.61 448.92 249.61"/>
+          <polygon fill="#99FF00" points="298.86 274.94 319.3 274.94 319.3 254.49 298.86 254.49"/>
+          <polygon fill="#8AE50A" points="345.62 274.94 325.18 274.94 325.18 254.49 345.62 254.49"/>
+          <polygon fill="#7DCF12" points="350.5 274.94 370.94 274.94 370.94 254.49 350.5 254.49"/>
+          <polygon fill="#FFA600" points="397.27 274.94 376.83 274.94 376.83 254.49 397.27 254.49"/>
+          <polygon fill="#FFBA00" points="403.15 274.94 423.59 274.94 423.59 254.49 403.15 254.49"/>
+          <polygon fill="#FFE500" points="448.92 274.94 428.47 274.94 428.47 254.49 448.92 254.49"/>
+          <polygon fill="#99FF00" points="345.62 280.82 325.18 280.82 325.18 301.26 345.62 301.26"/>
+          <polygon fill="#8AE50A" points="350.5 280.82 370.94 280.82 370.94 301.26 350.5 301.26"/>
+          <polygon fill="#FFBA00" points="397.27 280.82 376.83 280.82 376.83 301.26 397.27 301.26"/>
+          <polygon fill="#FFE500" points="403.15 280.82 423.59 280.82 423.59 301.26 403.15 301.26"/>
+          <polygon fill="#99FF00" points="350.5 326.58 370.94 326.58 370.94 306.14 350.5 306.14"/>
+          <polygon fill="#FFE500" points="397.27 326.58 376.83 326.58 376.83 306.14 397.27 306.14"/>
+        </svg>
+      </div>
+      <div class="truncate">
+        <div id="playerTitle" class="text-sm font-bold text-white truncate">Select a track to play</div>
+        <div id="playerSubtitle" class="text-xs text-slate-400 truncate">PixelSquad Studio AI</div>
+      </div>
+      <button onclick="toggleLyricsDrawer()" class="p-1.5 rounded-lg hover:bg-white/10 text-slate-400 hover:text-purple-400 transition" title="View Full Lyrics">
+        <i data-lucide="file-text" class="w-4 h-4"></i>
+      </button>
+    </div>
+
+    <!-- Center: Playback Controls & Seeker -->
+    <div class="flex flex-col items-center justify-center flex-1 max-w-xl px-4 space-y-1">
+      <div class="flex items-center gap-4">
+        <button onclick="playPrevTrack()" class="text-slate-400 hover:text-white transition">
+          <i data-lucide="skip-back" class="w-4 h-4"></i>
+        </button>
+        <button id="mainPlayPauseBtn" onclick="togglePlayPause()" class="w-10 h-10 rounded-full bg-white text-slate-900 flex items-center justify-center hover:scale-105 active:scale-95 transition shadow-lg shadow-white/20">
+          <i data-lucide="play" id="mainPlayIcon" class="w-5 h-5 ml-0.5 fill-current"></i>
+        </button>
+        <button onclick="playNextTrack()" class="text-slate-400 hover:text-white transition">
+          <i data-lucide="skip-forward" class="w-4 h-4"></i>
+        </button>
+        <button id="loopBtn" onclick="toggleLoop()" class="text-slate-400 hover:text-purple-400 transition" title="Toggle Loop">
+          <i data-lucide="repeat" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- Scrubber -->
+      <div class="w-full flex items-center gap-3 text-[11px] font-mono text-slate-400">
+        <span id="playerCurrentTime">0:00</span>
+        <div class="relative flex-1 group py-1 cursor-pointer" onclick="seekAudio(event)">
+          <div class="w-full h-1.5 bg-slate-700/60 rounded-full overflow-hidden">
+            <div id="playerProgressBar" class="h-full bg-gradient-to-r from-pink-500 to-purple-500 w-0 rounded-full"></div>
+          </div>
+        </div>
+        <span id="playerTotalDuration">0:00</span>
+      </div>
+    </div>
+
+    <!-- Right: Volume & Actions -->
+    <div class="flex items-center justify-end gap-3 w-1/4 min-w-[180px]">
+      <!-- Visualizer canvas -->
+      <canvas id="visualizerCanvas" width="60" height="24" class="rounded opacity-70 hidden sm:block"></canvas>
+
+      <button onclick="toggleMute()" class="text-slate-400 hover:text-white transition">
+        <i data-lucide="volume-2" id="volumeIcon" class="w-4 h-4"></i>
+      </button>
+      <input id="volumeSlider" type="range" min="0" max="1" step="0.05" value="0.9" oninput="setVolume(this.value)" class="w-20 accent-purple-500 h-1 bg-slate-700 rounded-lg cursor-pointer">
+
+      <button id="playerDownloadBtn" onclick="downloadCurrentTrack()" class="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition" title="Download Audio">
+        <i data-lucide="download" class="w-4 h-4"></i>
+      </button>
+    </div>
+  </footer>
+  </div> <!-- End Main App Container (Right Side) -->
+
+  <!-- KARAOKE LYRICS SLIDING DRAWER -->
+  <div id="lyricsDrawer" class="lyrics-drawer closed fixed top-14 bottom-20 right-0 w-full sm:w-[420px] bg-brandSurface/95 backdrop-blur-2xl border-l border-white/10 shadow-2xl p-6 z-40 flex flex-col">
+    <div class="flex items-center justify-between pb-4 border-b border-white/10 shrink-0">
+      <div>
+        <h3 id="lyricsDrawerTitle" class="text-sm font-bold text-white">Song Lyrics</h3>
+        <p id="lyricsDrawerSubtitle" class="text-xs text-purple-400">ACE-Step 1.5</p>
+      </div>
+      <button onclick="toggleLyricsDrawer()" class="p-1.5 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white transition">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+    </div>
+
+    <div class="flex-1 overflow-y-auto py-5 pr-1 space-y-4">
+      <div id="lyricsDrawerContent" class="text-sm font-mono leading-relaxed text-slate-200 whitespace-pre-wrap">
+        No lyrics available for this track.
+      </div>
+    </div>
+  </div>
+
+  <!-- CREATE / CLONE CUSTOM VOICE MODAL -->
+  <div id="createVoiceModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-brandSurface border border-white/10 rounded-2xl w-full max-w-md p-5 space-y-4 shadow-2xl relative">
+      <div class="flex items-center justify-between border-b border-white/10 pb-3">
+        <div class="flex items-center gap-2">
+          <i data-lucide="user-plus" class="w-5 h-5 text-amber-400"></i>
+          <h3 class="text-sm font-bold text-white uppercase tracking-wider">Create Custom Voice Profile</h3>
+        </div>
+        <button onclick="closeCreateVoiceModal()" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-white/10 transition cursor-pointer">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="text-[11px] font-semibold text-slate-300 block mb-1">Voice Character Name *</label>
+          <input id="newVoiceNameInput" type="text" placeholder="e.g. Vikram - Deep Villain Baritone" class="w-full bg-brandDark border border-white/10 rounded-xl px-3 py-2 text-slate-100 outline-none focus:border-amber-500 transition">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-[11px] font-semibold text-slate-300 block mb-1">Gender</label>
+            <select id="newVoiceGenderSelect" class="w-full bg-brandDark border border-white/10 rounded-xl px-3 py-2 text-slate-100 outline-none focus:border-amber-500">
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-[11px] font-semibold text-slate-300 block mb-1">Base Neural Voice</label>
+            <select id="newVoiceBaseSelect" class="w-full bg-brandDark border border-white/10 rounded-xl px-3 py-2 text-slate-100 outline-none focus:border-amber-500">
+              <option value="hi-IN-MadhurNeural">Madhur (Hindi Male)</option>
+              <option value="hi-IN-SwaraNeural">Swara (Hindi Female)</option>
+              <option value="en-IN-PrabhatNeural">Prabhat (Indian Eng Male)</option>
+              <option value="en-IN-NeerjaNeural">Neerja (Indian Eng Female)</option>
+              <option value="en-US-ChristopherNeural">Christopher (Narrator Male)</option>
+              <option value="en-US-JennyNeural">Jenny (US Female)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Reference Audio Sample (Mic Recording or File Upload) -->
+        <div class="space-y-2.5 p-3.5 rounded-xl bg-brandDark/60 border border-white/5">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-1.5">
+              <i data-lucide="mic" class="w-3.5 h-3.5 text-amber-400"></i>
+              <span class="text-[11px] font-bold text-slate-200">Reference Audio Sample (Optional)</span>
+            </div>
+            <span id="clonedVoiceFilename" class="text-[10px] text-amber-400 font-mono font-semibold"></span>
+          </div>
+          <p class="text-[10px] text-slate-400">Record a 5–10s voice clip with your microphone, or upload an audio sample for timbre matching</p>
+          
+          <!-- Mic & Upload Action Buttons -->
+          <div class="grid grid-cols-2 gap-2">
+            <button id="modalMicBtn" type="button" onclick="toggleModalMicRecording()" class="py-2 px-3 rounded-xl text-xs font-semibold bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 flex items-center justify-center gap-2 transition cursor-pointer">
+              <i data-lucide="mic" class="w-3.5 h-3.5"></i>
+              <span id="modalMicBtnText">Record Voice</span>
+            </button>
+            <button type="button" onclick="document.getElementById('clonedVoiceFileInput').click()" class="py-2 px-3 rounded-xl text-xs font-semibold bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10 flex items-center justify-center gap-2 transition cursor-pointer">
+              <i data-lucide="upload" class="w-3.5 h-3.5"></i>
+              <span>Choose File</span>
+            </button>
+            <input id="clonedVoiceFileInput" type="file" accept="audio/*" onchange="handleClonedAudioUpload(event)" class="hidden">
+          </div>
+
+          <!-- Active Recording Container (Pulsing VU Meter & Timer) -->
+          <div id="modalRecordingBox" class="hidden p-3 rounded-xl bg-rose-950/40 border border-rose-500/40 space-y-2">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="relative flex h-2.5 w-2.5">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-rose-500"></span>
+                </span>
+                <span class="text-xs font-bold text-rose-300">Recording Voice...</span>
+              </div>
+              <span id="modalRecTimer" class="font-mono text-xs font-bold text-rose-200">00:00 / 00:15</span>
+            </div>
+
+            <!-- Pulsing audio bars -->
+            <div class="flex items-center justify-center gap-1.5 h-6 py-1">
+              <span class="rec-bar bg-rose-400 w-1 rounded-full animate-bounce" style="height: 14px; animation-delay: 0.1s;"></span>
+              <span class="rec-bar bg-rose-400 w-1 rounded-full animate-bounce" style="height: 22px; animation-delay: 0.25s;"></span>
+              <span class="rec-bar bg-rose-400 w-1 rounded-full animate-bounce" style="height: 10px; animation-delay: 0.15s;"></span>
+              <span class="rec-bar bg-rose-400 w-1 rounded-full animate-bounce" style="height: 24px; animation-delay: 0.3s;"></span>
+              <span class="rec-bar bg-rose-400 w-1 rounded-full animate-bounce" style="height: 18px; animation-delay: 0.05s;"></span>
+              <span class="rec-bar bg-rose-400 w-1 rounded-full animate-bounce" style="height: 26px; animation-delay: 0.2s;"></span>
+              <span class="rec-bar bg-rose-400 w-1 rounded-full animate-bounce" style="height: 12px; animation-delay: 0.35s;"></span>
+            </div>
+
+            <div class="flex items-center justify-end gap-2 pt-1">
+              <button type="button" onclick="cancelModalMicRecording()" class="px-2 py-1 text-[11px] text-slate-400 hover:text-white transition cursor-pointer">Cancel</button>
+              <button type="button" onclick="stopModalMicRecording()" class="px-3 py-1 rounded-lg text-xs font-bold bg-rose-600 hover:bg-rose-500 text-white flex items-center gap-1.5 shadow transition cursor-pointer">
+                <i data-lucide="square" class="w-3 h-3 fill-current"></i> Stop & Save
+              </button>
+            </div>
+          </div>
+
+          <!-- Recorded / Uploaded Audio Preview Player -->
+          <div id="modalAudioPreviewBox" class="hidden p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/25 space-y-1.5">
+            <div class="flex items-center justify-between text-[11px]">
+              <span class="text-amber-300 font-semibold flex items-center gap-1">
+                <i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-amber-400"></i> Voice Sample Ready
+              </span>
+              <button type="button" onclick="discardClonedAudio()" class="text-slate-400 hover:text-rose-400 text-[10px] flex items-center gap-1 transition cursor-pointer">
+                <i data-lucide="trash-2" class="w-3 h-3"></i> Remove
+              </button>
+            </div>
+            <audio id="modalAudioPlayer" controls class="w-full h-8 rounded-lg outline-none"></audio>
+          </div>
+        </div>
+
+        <!-- Pitch & Rate Adjustments -->
+        <div class="grid grid-cols-2 gap-3 pt-1">
+          <div>
+            <label class="text-[11px] text-slate-400 block mb-1">Tone Pitch Shift</label>
+            <select id="newVoicePitchSelect" class="w-full bg-brandDark border border-white/10 rounded-xl px-3 py-1.5 text-slate-200 outline-none">
+              <option value="-15Hz">Heavy / Deep (-15Hz)</option>
+              <option value="-8Hz">Warm Baritone (-8Hz)</option>
+              <option value="+0Hz" selected>Natural (+0Hz)</option>
+              <option value="+8Hz">Crisp (+8Hz)</option>
+              <option value="+15Hz">High Pitch (+15Hz)</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-[11px] text-slate-400 block mb-1">Speaking Pace</label>
+            <select id="newVoiceRateSelect" class="w-full bg-brandDark border border-white/10 rounded-xl px-3 py-1.5 text-slate-200 outline-none">
+              <option value="-10%">Dramatic Slow (-10%)</option>
+              <option value="+0%" selected>Normal Pace (+0%)</option>
+              <option value="+10%">Fast / Energetic (+10%)</option>
+              <option value="+20%">Rapid Fire (+20%)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end gap-2 pt-2 border-t border-white/10">
+        <button onclick="closeCreateVoiceModal()" class="px-3.5 py-1.5 rounded-xl text-xs text-slate-400 hover:text-white transition cursor-pointer">Cancel</button>
+        <button onclick="saveNewCustomVoice()" class="px-4 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-amber-500 to-purple-600 text-white shadow-lg hover:brightness-110 transition cursor-pointer flex items-center gap-1.5">
+          <i data-lucide="check" class="w-3.5 h-3.5"></i> Save to Voice Library
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Audio Element -->
+  <audio id="globalAudioPlayer" preload="auto"></audio>
+
+  <!-- App Script -->
+  <script src="/app.js"></script>
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+</html>
