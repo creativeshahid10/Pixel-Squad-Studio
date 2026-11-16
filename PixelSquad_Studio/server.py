@@ -9,6 +9,8 @@ import json
 import glob
 import time
 import tempfile
+import subprocess
+import platform
 from pathlib import Path
 from typing import Optional, List, Dict, Any, Set
 
@@ -127,32 +129,113 @@ async def upload_audio(file: UploadFile = File(...)):
     }
 
 
-@app.get("/api/system-status")
-async def get_system_status():
-    """Return GPU and runtime telemetry."""
+def detect_system_hardware() -> Dict[str, Any]:
+    """Dynamically detect real physical GPU and hardware specs across CUDA, ROCm, MPS, XPU, or WMI/System."""
+    hw = {
+        "gpu_name": "CPU",
+        "vram_gb": 0.0,
+        "device_type": "cpu"
+    }
+
+    # 1. PyTorch CUDA / ROCm / MPS / XPU detection
     try:
         import torch
+        if torch.cuda.is_available():
+            hw["gpu_name"] = torch.cuda.get_device_name(0)
+            mem_bytes = torch.cuda.get_device_properties(0).total_memory
+            hw["vram_gb"] = round(mem_bytes / (1024**3), 1)
+            hw["device_type"] = "cuda"
+            return hw
+        elif hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
+            hw["gpu_name"] = "Apple Silicon GPU (MPS)"
+            hw["vram_gb"] = 8.0
+            hw["device_type"] = "mps"
+            return hw
+        elif hasattr(torch, "xpu") and torch.xpu.is_available():
+            props = torch.xpu.get_device_properties(0)
+            hw["gpu_name"] = getattr(props, "name", "Intel XPU")
+            hw["vram_gb"] = round(getattr(props, "total_memory", 0) / (1024**3), 1)
+            hw["device_type"] = "xpu"
+            return hw
+    except Exception as e:
+        logger.warning(f"PyTorch GPU check error: {e}")
+
+    # 2. nvidia-smi tool check
+    try:
+        out = subprocess.check_output(
+            ["nvidia-smi", "--query-gpu=name,memory.total", "--format=csv,noheader,nounits"],
+            encoding="utf-8",
+            timeout=3
+        )
+        line = out.strip().splitlines()[0]
+        parts = [p.strip() for p in line.split(",")]
+        hw["gpu_name"] = parts[0]
+        if len(parts) > 1:
+            hw["vram_gb"] = round(float(parts[1]) / 1024.0, 1)
+        hw["device_type"] = "nvidia-smi"
+        return hw
+    except Exception:
+        pass
+
+    # 3. Windows WMI / CimInstance (detects actual installed GPU even if PyTorch is CPU-only)
+    if sys.platform == "win32":
+        try:
+            cmd = ["powershell", "-NoProfile", "-Command", "Get-CimInstance Win32_VideoController | Select-Object Name, AdapterRAM | ConvertTo-Json"]
+            out = subprocess.check_output(cmd, encoding="utf-8", timeout=4)
+            data = json.loads(out)
+            if isinstance(data, dict):
+                data = [data]
+            dedicated = []
+            integrated = []
+            for d in data:
+                name = (d.get("Name") or "").strip()
+                ram = d.get("AdapterRAM", 0) or 0
+                if any(x in name.lower() for x in ["nvidia", "geforce", "rtx", "gtx", "radeon", "arc"]):
+                    dedicated.append((name, ram))
+                else:
+                    integrated.append((name, ram))
+            if dedicated:
+                best = dedicated[0]
+                hw["gpu_name"] = best[0]
+                hw["vram_gb"] = round(best[1] / (1024**3), 1) if best[1] > 0 else 0.0
+                hw["device_type"] = "wmi_dedicated"
+                return hw
+            elif integrated:
+                best = integrated[0]
+                hw["gpu_name"] = best[0]
+                hw["vram_gb"] = round(best[1] / (1024**3), 1) if best[1] > 0 else 0.0
+                hw["device_type"] = "wmi_igpu"
+                return hw
+        except Exception as e:
+            logger.warning(f"WMI hardware detection error: {e}")
+
+    # 4. Fallback to CPU processor
+    proc = platform.processor() or "CPU"
+    hw["gpu_name"] = proc if len(proc) < 40 else "CPU Processor"
+    return hw
+
+
+@app.get("/api/system-status")
+async def get_system_status():
+    """Return GPU and runtime telemetry dynamically detected from host system."""
+    hw = detect_system_hardware()
+    tier = "tier1"
+    try:
         from acestep.gpu_config import get_gpu_config
         cfg = get_gpu_config()
-        gpu_name = torch.cuda.get_device_name(0) if torch.cuda.is_available() else "CPU"
-        vram_gb = round(torch.cuda.get_device_properties(0).total_memory / (1024**3), 2) if torch.cuda.is_available() else 0.0
-        return {
-            "status": "online",
-            "gpu_name": gpu_name,
-            "vram_gb": vram_gb,
-            "tier": cfg.tier,
-            "model": "acestep-v15-turbo (INT8 + Flash Attention 2)",
-            "output_dir": OUTPUTS_DIR
-        }
-    except Exception as e:
-        return {
-            "status": "online",
-            "gpu_name": "NVIDIA GeForce RTX 3060",
-            "vram_gb": 6.0,
-            "tier": "tier2",
-            "model": "acestep-v15-turbo",
-            "error": str(e)
-        }
+        tier = cfg.tier
+    except Exception:
+        pass
+
+    return {
+        "status": "online",
+        "gpu_name": hw["gpu_name"],
+        "vram_gb": hw["vram_gb"],
+        "device_type": hw.get("device_type", "gpu"),
+        "tier": tier,
+        "model": "acestep-v15-turbo (INT8 + Flash Attention 2)",
+        "output_dir": OUTPUTS_DIR
+    }
 
 
 @app.get("/api/tracks")

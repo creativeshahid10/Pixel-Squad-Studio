@@ -144,13 +144,94 @@ function restorePersonalizeTaste() {
   }
 }
 
-// Fetch system telemetry
+// Hardware telemetry state
+let currentSystemGpu = {
+  name: 'Detecting GPU...',
+  vram: 0,
+  deviceType: 'gpu'
+};
+
+// WebGL helper: detect physical display GPU of the client device screen directly in browser
+function getClientGpuDetails() {
+  try {
+    const canvas = document.createElement('canvas');
+    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+    if (gl) {
+      const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+      if (debugInfo) {
+        const raw = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) || '';
+        // Extract clean GPU name from ANGLE / driver string
+        const match = raw.match(/ANGLE\s*\([^,]+,\s*([^,]+)/i);
+        if (match && match[1]) {
+          return match[1].trim();
+        }
+        if (raw.includes('Direct3D') || raw.includes('OpenGL')) {
+          return raw.split(/Direct3D|vs_|OpenGL/)[0].trim().replace(/^ANGLE\s*\(/i, '').replace(/,\s*$/, '');
+        }
+        return raw.trim();
+      }
+    }
+  } catch (e) {}
+  return null;
+}
+
+// Fetch system telemetry and detect exact laptop hardware dynamically
 async function fetchSystemStatus() {
+  const clientGpu = getClientGpuDetails();
+  
+  // Update with client screen GPU immediately if available
+  if (clientGpu) {
+    const headerLabel = document.getElementById('gpuModelLabel');
+    if (headerLabel) headerLabel.textContent = clientGpu;
+    const sidebarLabel = document.getElementById('sidebarGpuLabel');
+    if (sidebarLabel) {
+      let shortName = clientGpu
+        .replace(/NVIDIA\s+GeForce\s+/i, '')
+        .replace(/\s+Laptop\s+GPU/i, '')
+        .replace(/\s+Graphics/i, '');
+      sidebarLabel.textContent = shortName;
+    }
+    currentSystemGpu.name = clientGpu;
+  }
+
   try {
     const res = await fetch('/api/system-status');
     const data = await res.json();
-    if (data.gpu_name) {
-      document.getElementById('gpuModelLabel').textContent = `${data.gpu_name} (${data.vram_gb}GB)`;
+    
+    // Choose most accurate hardware name:
+    // If accessed over LAN on another laptop, clientGpu reflects that laptop screen!
+    let displayName = data.gpu_name || clientGpu || 'GPU';
+    let vramText = data.vram_gb && data.vram_gb > 0 ? `${data.vram_gb}GB` : '';
+
+    currentSystemGpu = {
+      name: displayName,
+      vram: data.vram_gb || 0,
+      clientGpu: clientGpu
+    };
+
+    const fullLabel = vramText ? `${displayName} (${vramText})` : displayName;
+
+    // Short label for sidebar (e.g. "RTX 3060 (6GB)", "RTX 4060 (8GB)", "Iris Xe", "Apple M2")
+    let shortName = displayName
+      .replace(/NVIDIA\s+GeForce\s+/i, '')
+      .replace(/\s+Laptop\s+GPU/i, '')
+      .replace(/\s+Graphics/i, '');
+    const shortLabel = vramText ? `${shortName} (${vramText})` : shortName;
+
+    // Update Header Badge
+    const headerLabel = document.getElementById('gpuModelLabel');
+    if (headerLabel) {
+      headerLabel.textContent = fullLabel;
+    }
+
+    // Update Sidebar Navigation Button
+    const sidebarLabel = document.getElementById('sidebarGpuLabel');
+    if (sidebarLabel) {
+      sidebarLabel.textContent = shortLabel;
+    }
+    const navBtn = document.getElementById('navCreditsBtn');
+    if (navBtn) {
+      navBtn.title = `${fullLabel} • Unlimited Local Engine`;
     }
   } catch (err) {
     console.warn('System status fetch failed:', err);
@@ -1639,11 +1720,13 @@ function switchNavTab(tab) {
 }
 
 function showUserProfileModal() {
-  alert('👤 PixelSquad Studio Account:\n• User: Shahid (Admin)\n• Engine: ACE-Step 1.5 Local DiT Turbo\n• GPU: NVIDIA GeForce RTX 3060 Laptop (6GB VRAM)\n• Mode: Unlimited Private Generation (0 Cost)');
+  const gpuText = currentSystemGpu.name + (currentSystemGpu.vram ? ` (${currentSystemGpu.vram}GB VRAM)` : '');
+  alert(`👤 PixelSquad Studio Account:\n• User: Shahid (Admin)\n• Engine: ACE-Step 1.5 Local DiT Turbo\n• GPU: ${gpuText}\n• Mode: Unlimited Private Generation (0 Cost)`);
 }
 
 function showCreditsInfo() {
-  alert('🎁 Free & Unlimited Local Credits:\n• You are running 100% locally on your NVIDIA RTX 3060 GPU.\n• No subscription or token limits.\n• Generate unlimited songs, raps, covers, and dialogue speech completely free!');
+  const gpuText = currentSystemGpu.name + (currentSystemGpu.vram ? ` (${currentSystemGpu.vram}GB)` : '');
+  alert(`🎁 Free & Unlimited Local Credits:\n• You are running 100% locally on your ${gpuText}.\n• No subscription or token limits.\n• Generate unlimited songs, raps, covers, and dialogue speech completely free!`);
 }
 
 function showNotifications() {

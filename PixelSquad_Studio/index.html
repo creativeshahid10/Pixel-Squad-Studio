@@ -136,10 +136,10 @@
       <!-- Secondary Hardware Info Section (with gap) -->
       <div class="pt-4 space-y-1 border-t border-white/5">
         <!-- 8. Local Hardware Engine -->
-        <button id="navCreditsBtn" onclick="showCreditsInfo()" class="suno-nav-item" title="NVIDIA GeForce RTX 3060 Laptop (6GB VRAM)">
+        <button id="navCreditsBtn" onclick="showCreditsInfo()" class="suno-nav-item" title="Detecting Hardware...">
           <i data-lucide="cpu" class="w-5 h-5 text-emerald-400"></i>
           <span class="nav-label flex items-center justify-between w-full">
-            <span>RTX 3060 (6GB)</span>
+            <span id="sidebarGpuLabel">Detecting GPU...</span>
             <span class="text-[9px] px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 font-bold">Local</span>
           </span>
         </button>
@@ -174,7 +174,7 @@
 
         <div id="gpuStatusBadge" class="hidden sm:flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs text-slate-300">
           <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span id="gpuModelLabel" class="font-medium text-slate-200">PixelSquad OS • RTX 3060 (6GB)</span>
+          <span id="gpuModelLabel" class="font-medium text-slate-200">Detecting GPU...</span>
         </div>
         <button onclick="refreshTracks()" class="p-2 rounded-lg hover:bg-white/5 text-slate-400 hover:text-white transition" title="Refresh Songs">
           <i data-lucide="rotate-cw" class="w-4 h-4"></i>
