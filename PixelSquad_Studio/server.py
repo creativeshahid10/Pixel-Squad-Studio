@@ -3,6 +3,7 @@ Suno Studio Server for ACE-Step 1.5
 High-performance backend serving the Suno.com-inspired music creation interface.
 """
 
+import re
 import os
 import sys
 import json
@@ -38,7 +39,36 @@ app = create_app()
 STUDIO_DIR = os.path.dirname(os.path.abspath(__file__))
 OUTPUTS_DIR = os.path.join(PROJECT_ROOT, "gradio_outputs")
 UPLOADS_DIR = os.path.join(OUTPUTS_DIR, "uploads")
+CUSTOM_VOICES_DIR = os.path.join(PROJECT_ROOT, "custom_voices")
+CUSTOM_VOICES_FILE = os.path.join(CUSTOM_VOICES_DIR, "voices.json")
 os.makedirs(UPLOADS_DIR, exist_ok=True)
+os.makedirs(CUSTOM_VOICES_DIR, exist_ok=True)
+
+ALLOWED_AUDIO_EXTENSIONS = {".mp3", ".wav", ".flac", ".ogg", ".m4a", ".aac", ".opus", ".webm"}
+MAX_TRACKED_TASKS = 200
+
+def is_safe_audio_path(path: str) -> bool:
+    """Validate that the target audio path is inside authorized project/output boundaries."""
+    if not path or not isinstance(path, str):
+        return False
+    try:
+        resolved = os.path.realpath(path)
+        allowed_roots = [
+            os.path.realpath(OUTPUTS_DIR),
+            os.path.realpath(CUSTOM_VOICES_DIR),
+            os.path.realpath(os.path.join(PROJECT_ROOT, ".cache")),
+            os.path.realpath(tempfile.gettempdir()),
+        ]
+        in_allowed_root = any(
+            resolved == root or resolved.startswith(root + os.sep)
+            for root in allowed_roots
+        )
+        if not in_allowed_root:
+            return False
+        _, ext = os.path.splitext(resolved)
+        return ext.lower() in ALLOWED_AUDIO_EXTENSIONS
+    except Exception:
+        return False
 
 # Global dictionary to track in-flight tasks and their user parameters
 PENDING_TASKS: Dict[str, Dict[str, Any]] = {}
@@ -99,22 +129,41 @@ class SunoGeneratePayload(BaseModel):
 
 @app.post("/api/upload-audio")
 async def upload_audio(file: UploadFile = File(...)):
-    """Upload audio file for Reference Audio / Cover / Repaint / Analyzer / Mic recording."""
-    import subprocess
-    clean_filename = f"{int(time.time())}_{file.filename}"
+    """Upload audio file for Reference Audio / Cover / Repaint / Analyzer / Mic recording with strict validation."""
+    raw_name = Path(file.filename or "upload.mp3").name
+    clean_stem = re.sub(r"[^\w\-]", "_", Path(raw_name).stem)[:80]
+    ext = Path(raw_name).suffix.lower()
+    if ext not in ALLOWED_AUDIO_EXTENSIONS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unsupported audio format '{ext}'. Allowed: {', '.join(sorted(ALLOWED_AUDIO_EXTENSIONS))}"
+        )
+
+    clean_filename = f"{int(time.time())}_{clean_stem}{ext}"
     save_path = os.path.join(UPLOADS_DIR, clean_filename)
+
+    # Enforce 100MB max file size to prevent disk exhaustion
+    MAX_UPLOAD_BYTES = 100 * 1024 * 1024
+    total_bytes = 0
     with open(save_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
+        while chunk := await file.read(1024 * 1024):  # 1MB chunks
+            total_bytes += len(chunk)
+            if total_bytes > MAX_UPLOAD_BYTES:
+                buffer.close()
+                if os.path.exists(save_path):
+                    os.remove(save_path)
+                raise HTTPException(status_code=413, detail="File too large (max 100MB allowed)")
+            buffer.write(chunk)
     abs_path = os.path.abspath(save_path)
 
     # If audio is webm/ogg/opus/m4a, transcode to high-quality MP3 for universal ACE-Step compatibility
     base, ext = os.path.splitext(clean_filename)
-    if ext.lower() in [".webm", ".ogg", ".opus", ".m4a", ""]:
+    if ext.lower() in [".webm", ".ogg", ".opus", ".m4a"]:
         mp3_filename = f"{base}.mp3"
         mp3_path = os.path.join(UPLOADS_DIR, mp3_filename)
         cmd = ["ffmpeg", "-y", "-i", abs_path, "-vn", "-ar", "44100", "-ac", "2", "-b:a", "192k", mp3_path]
         try:
-            res = subprocess.run(cmd, capture_output=True, timeout=10)
+            res = subprocess.run(cmd, capture_output=True, timeout=15)
             if res.returncode == 0 and os.path.exists(mp3_path):
                 abs_path = os.path.abspath(mp3_path)
                 clean_filename = mp3_filename
@@ -291,6 +340,8 @@ async def get_tracks():
 
             mtime = os.path.getmtime(audio_path)
             created_str = time.strftime("%b %d, %I:%M %p", time.localtime(mtime))
+            wav_candidate = os.path.join(base_dir, f"{base_name}.wav")
+            has_wav = os.path.exists(wav_candidate)
             
             tracks.append({
                 "id": base_name,
@@ -306,6 +357,9 @@ async def get_tracks():
                 "created_at": created_str,
                 "timestamp": mtime,
                 "audio_url": f"/api/audio-file?path={os.path.abspath(audio_path)}",
+                "wav_url": f"/api/audio-file?path={os.path.abspath(wav_candidate)}" if has_wav else f"/api/tracks/{base_name}/download-wav",
+                "download_mp3_url": f"/api/tracks/{base_name}/download-mp3",
+                "download_wav_url": f"/api/tracks/{base_name}/download-wav",
                 "audio_path": audio_path,
                 "json_path": jf
             })
@@ -344,11 +398,14 @@ async def get_tracks():
 
 @app.get("/api/audio-file")
 async def stream_audio_file(path: str):
-    """Stream audio files directly with byte-range support for smooth scrubbing."""
-    if not os.path.exists(path):
+    """Stream audio files directly with byte-range support and strict boundary validation."""
+    if not is_safe_audio_path(path):
+        raise HTTPException(status_code=403, detail="Access denied: invalid file path or format")
+    real_path = os.path.realpath(path)
+    if not os.path.isfile(real_path):
         raise HTTPException(status_code=404, detail="Audio file not found")
-    media_type = "audio/mpeg" if path.endswith(".mp3") else "audio/wav"
-    return FileResponse(path, media_type=media_type, filename=os.path.basename(path))
+    media_type = "audio/mpeg" if real_path.endswith(".mp3") else "audio/wav"
+    return FileResponse(real_path, media_type=media_type, filename=os.path.basename(real_path))
 
 
 @app.post("/api/generate-track")
@@ -608,6 +665,7 @@ async def check_track_status(task_id: str):
                 batch_dir = os.path.join(OUTPUTS_DIR, f"batch_{task_id[:12]}")
                 os.makedirs(batch_dir, exist_ok=True)
                 dest_audio = os.path.join(batch_dir, f"{task_id}.mp3")
+                dest_wav = os.path.join(batch_dir, f"{task_id}.wav")
                 dest_json = os.path.join(batch_dir, f"{task_id}.json")
                 
                 meta = PENDING_TASKS.get(task_id, {})
@@ -626,6 +684,18 @@ async def check_track_status(task_id: str):
                     except Exception as me:
                         logger.warning(f"Mastering failed, falling back to direct copy: {me}")
                         shutil.copyfile(file_path, dest_audio)
+
+                if not os.path.exists(dest_wav):
+                    try:
+                        # Master broadcast lossless 24-bit 48kHz WAV for Adobe Premiere Pro / DAWs
+                        master_audio_file(
+                            input_path=file_path,
+                            output_path=dest_wav,
+                            preset=preset,
+                            sample_rate=48000
+                        )
+                    except Exception as we:
+                        logger.warning(f"WAV export failed: {we}")
 
                 meta_payload = {
                     "title": meta.get("title") or first_item.get("metas", {}).get("title") or "PixelSquad Song",
@@ -672,7 +742,10 @@ async def check_track_status(task_id: str):
 
 @app.delete("/api/tracks/{track_id}")
 async def delete_track(track_id: str):
-    """Delete a track and its metadata files."""
+    """Delete a track and its metadata files with safe identifier validation."""
+    if not re.match(r"^[a-zA-Z0-9_\-]+$", track_id):
+        raise HTTPException(status_code=400, detail="Invalid track ID format")
+
     json_files = glob.glob(os.path.join(OUTPUTS_DIR, "**", f"{track_id}.json"), recursive=True)
     deleted = 0
     for jf in json_files:
@@ -687,6 +760,9 @@ async def delete_track(track_id: str):
                     deleted += 1
         except Exception:
             pass
+
+    COMPLETED_TASKS.pop(track_id, None)
+    PENDING_TASKS.pop(track_id, None)
     return {"success": True, "deleted_files": deleted}
 
 
@@ -800,8 +876,11 @@ def load_custom_voices() -> List[Dict[str, Any]]:
         return []
 
 def save_custom_voices(voices: List[Dict[str, Any]]):
-    with open(CUSTOM_VOICES_FILE, "w", encoding="utf-8") as f:
+    """Save custom voices with atomic file replacement to prevent file corruption."""
+    tmp_path = CUSTOM_VOICES_FILE + f".tmp_{os.getpid()}"
+    with open(tmp_path, "w", encoding="utf-8") as f:
         json.dump(voices, f, ensure_ascii=False, indent=2)
+    os.replace(tmp_path, CUSTOM_VOICES_FILE)
 
 class CreateVoicePayload(BaseModel):
     name: str
@@ -829,8 +908,9 @@ class PreviewTTSPayload(BaseModel):
     pitch: Optional[str] = "+0Hz"
 
 def apply_audio_fx(input_path: str, output_path: str, rate_factor: float = 1.0, pitch_factor: float = 1.0):
-    """Use FFmpeg to adjust tempo and pitch cleanly."""
+    """Use FFmpeg to adjust tempo and pitch cleanly without in-place truncation."""
     import subprocess
+    import tempfile
     if abs(rate_factor - 1.0) < 0.02 and abs(pitch_factor - 1.0) < 0.02:
         if input_path != output_path:
             shutil.copyfile(input_path, output_path)
@@ -850,11 +930,23 @@ def apply_audio_fx(input_path: str, output_path: str, rate_factor: float = 1.0, 
         filters.append(f"atempo={rf:.2f}")
 
     filter_str = ",".join(filters) if filters else "anull"
-    cmd = ["ffmpeg", "-y", "-i", input_path, "-filter:a", filter_str, output_path]
-    res = subprocess.run(cmd, capture_output=True)
-    if res.returncode != 0 or not os.path.exists(output_path) or os.path.getsize(output_path) == 0:
-        if input_path != output_path:
+
+    with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as tmp_f:
+        tmp_fx = tmp_f.name
+
+    try:
+        cmd = ["ffmpeg", "-y", "-i", input_path, "-filter:a", filter_str, "-b:a", "192k", tmp_fx]
+        res = subprocess.run(cmd, capture_output=True)
+        if res.returncode == 0 and os.path.exists(tmp_fx) and os.path.getsize(tmp_fx) > 500:
+            shutil.copyfile(tmp_fx, output_path)
+        elif input_path != output_path:
             shutil.copyfile(input_path, output_path)
+    finally:
+        if os.path.exists(tmp_fx):
+            try:
+                os.remove(tmp_fx)
+            except Exception:
+                pass
 
 
 def get_elevenlabs_api_key() -> str:
@@ -1102,7 +1194,9 @@ async def create_voice(payload: CreateVoicePayload):
 @app.post("/api/voices/batch-import")
 async def batch_import_voices(files: List[UploadFile] = File(...)):
     """Batch import multiple audio files and automatically register each as a Custom Voice named after the file."""
-    import re
+    if len(files) > 50:
+        raise HTTPException(status_code=400, detail="Too many files in batch (maximum 50 files allowed per import)")
+
     from PixelSquad_Studio.voice_cloner import extract_vocal_features
 
     custom_voices = load_custom_voices()
@@ -1113,8 +1207,11 @@ async def batch_import_voices(files: List[UploadFile] = File(...)):
 
     for idx, f in enumerate(files):
         # Extract clean character/person name from filename
-        # e.g. "Amitabh_Bachchan_Sample.mp3" -> "Amitabh Bachchan Sample"
-        raw_name = Path(f.filename).stem
+        raw_name = Path(f.filename or "voice.mp3").stem
+        ext = Path(f.filename or "voice.mp3").suffix.lower()
+        if ext not in ALLOWED_AUDIO_EXTENSIONS:
+            continue
+
         clean_name = re.sub(r"[_\-]+", " ", raw_name).strip()
         clean_name = re.sub(r"\s+", " ", clean_name)
         if not clean_name:
@@ -1127,7 +1224,10 @@ async def batch_import_voices(files: List[UploadFile] = File(...)):
             shutil.copyfileobj(f.file, out_f)
 
         # Detect vocal features to automatically select gender & base voice
-        f0, _ = extract_vocal_features(dest_path)
+        try:
+            f0, _ = extract_vocal_features(dest_path)
+        except Exception:
+            f0 = 130.0
         is_female = f0 >= 165.0
         gender = "female" if is_female else "male"
         base_voice = "hi-IN-SwaraNeural" if is_female else "hi-IN-MadhurNeural"
@@ -1141,7 +1241,7 @@ async def batch_import_voices(files: List[UploadFile] = File(...)):
             "pitch": "+0Hz",
             "rate": "+0%",
             "volume": "+0%",
-            "description": f"Batch imported from {f.filename} (detected F0: {f0:.1f}Hz)",
+            "description": f"Batch imported from {Path(f.filename).name} (detected F0: {f0:.1f}Hz)",
             "reference_audio_path": dest_path,
             "category": "custom",
             "badge": "🌟 Batch Cloned",
@@ -1157,6 +1257,20 @@ async def batch_import_voices(files: List[UploadFile] = File(...)):
         "count": len(imported_voices),
         "voices": imported_voices
     }
+
+
+@app.delete("/api/voices/{voice_id}")
+async def delete_custom_voice(voice_id: str):
+    """Delete a custom cloned/imported voice from the voice library."""
+    if not re.match(r"^[a-zA-Z0-9_\-]+$", voice_id):
+        raise HTTPException(status_code=400, detail="Invalid voice ID format")
+    custom_voices = load_custom_voices()
+    initial_count = len(custom_voices)
+    custom_voices = [v for v in custom_voices if v.get("id") != voice_id]
+    if len(custom_voices) == initial_count:
+        raise HTTPException(status_code=404, detail="Custom voice not found")
+    save_custom_voices(custom_voices)
+    return {"success": True, "voice_id": voice_id, "remaining": len(custom_voices)}
 
 
 @app.post("/api/tts/preview")
@@ -1297,6 +1411,8 @@ class RemasterPayload(BaseModel):
 @app.post("/api/tracks/{track_id}/master")
 async def remaster_track(track_id: str, payload: Optional[RemasterPayload] = None):
     """Re-master an existing track with professional studio audio processing."""
+    if not re.match(r"^[a-zA-Z0-9_\-]+$", track_id):
+        raise HTTPException(status_code=400, detail="Invalid track ID format")
     import glob
     preset = (payload.preset if payload else None) or "suno_studio"
     mp3_files = glob.glob(os.path.join(OUTPUTS_DIR, "**", f"{track_id}.mp3"), recursive=True)
@@ -1333,6 +1449,96 @@ async def remaster_track(track_id: str, payload: Optional[RemasterPayload] = Non
                 os.remove(tmp_master)
             except Exception:
                 pass
+
+
+def sanitize_audio_filename(title: str, ext: str = "mp3") -> str:
+    """Sanitize track title for Windows filesystem and Adobe Premiere Pro compatibility.
+    Removes URI fragment delimiters (#), percent signs (%), emojis, and illegal filesystem characters.
+    """
+    if not title:
+        title = "PixelSquad_Audio"
+    # Remove symbols / emojis / surrogate characters
+    clean = re.sub(r"[\U00010000-\U0010ffff\uD800-\uDFFF\uFE00-\uFE0F\u200D\u2600-\u27BF]", "", str(title))
+    # Remove reserved path characters that break Windows / Adobe Premiere Pro C++ importer
+    clean = re.sub(r"[#%<>:\"/\\|?*+=~!@$^&;`']+", "", clean)
+    clean = re.sub(r"\s+", "_", clean).strip(" ._-")
+    if not clean:
+        clean = "PixelSquad_Audio"
+    return f"{clean}.{ext.lstrip('.')}"
+
+
+@app.get("/api/tracks/{track_id}/download-mp3")
+async def download_track_mp3(track_id: str):
+    """Download MP3 audio file with Premiere Pro-compatible ID3v2.3 tags and clean filename."""
+    if not re.match(r"^[a-zA-Z0-9_\-]+$", track_id):
+        raise HTTPException(status_code=400, detail="Invalid track ID format")
+    mp3_files = glob.glob(os.path.join(OUTPUTS_DIR, "**", f"{track_id}.mp3"), recursive=True)
+    if not mp3_files:
+        raise HTTPException(status_code=404, detail="MP3 file not found")
+    target_mp3 = mp3_files[0]
+    
+    # Read title from json if present
+    json_path = os.path.splitext(target_mp3)[0] + ".json"
+    title = f"Track_{track_id[:8]}"
+    if os.path.exists(json_path):
+        try:
+            with open(json_path, "r", encoding="utf-8") as jf:
+                meta = json.load(jf)
+                title = meta.get("title") or title
+        except Exception:
+            pass
+    filename = sanitize_audio_filename(title, "mp3")
+    return FileResponse(
+        target_mp3,
+        media_type="audio/mpeg",
+        filename=filename,
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'}
+    )
+
+
+@app.get("/api/tracks/{track_id}/download-wav")
+async def download_track_wav(track_id: str):
+    """Download studio-grade lossless 24-bit 48kHz WAV file for Adobe Premiere Pro / DAWs."""
+    if not re.match(r"^[a-zA-Z0-9_\-]+$", track_id):
+        raise HTTPException(status_code=400, detail="Invalid track ID format")
+    wav_files = glob.glob(os.path.join(OUTPUTS_DIR, "**", f"{track_id}.wav"), recursive=True)
+    target_wav = wav_files[0] if wav_files else None
+    
+    # If WAV doesn't exist, convert from MP3 on-the-fly
+    if not target_wav or not os.path.exists(target_wav):
+        mp3_files = glob.glob(os.path.join(OUTPUTS_DIR, "**", f"{track_id}.mp3"), recursive=True)
+        if not mp3_files:
+            raise HTTPException(status_code=404, detail="Track audio not found")
+        source_mp3 = mp3_files[0]
+        target_wav = os.path.splitext(source_mp3)[0] + ".wav"
+        cmd = [
+            "ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
+            "-i", source_mp3,
+            "-codec:a", "pcm_s24le",
+            "-ar", "48000",
+            "-ac", "2",
+            target_wav
+        ]
+        res = subprocess.run(cmd, capture_output=True)
+        if res.returncode != 0 or not os.path.exists(target_wav):
+            raise HTTPException(status_code=500, detail="Failed to transcode to broadcast WAV")
+
+    json_path = os.path.splitext(target_wav)[0] + ".json"
+    title = f"Track_{track_id[:8]}"
+    if os.path.exists(json_path):
+        try:
+            with open(json_path, "r", encoding="utf-8") as jf:
+                meta = json.load(jf)
+                title = meta.get("title") or title
+        except Exception:
+            pass
+    filename = sanitize_audio_filename(title, "wav")
+    return FileResponse(
+        target_wav,
+        media_type="audio/wav",
+        filename=filename,
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'}
+    )
 
 
 # Mount Suno Studio frontend as static files at root

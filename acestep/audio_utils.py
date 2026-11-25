@@ -176,7 +176,10 @@ class AudioSaver:
                 '-i', str(temp_wav_path),
                 '-codec:a', 'libmp3lame',
                 '-ar', str(int(target_sample_rate)),
+                '-ac', '2',
                 '-b:a', bitrate,
+                '-id3v2_version', '3',
+                '-write_xing', '0',
                 str(output_path),
             ]
             subprocess.run(cmd, check=True, capture_output=True, timeout=120)

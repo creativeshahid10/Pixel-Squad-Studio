@@ -7,6 +7,7 @@ from user-recorded microphone clips or reference audio samples.
 import os
 import shutil
 import subprocess
+import tempfile
 from typing import Optional, Tuple
 import numpy as np
 import scipy.signal
@@ -128,10 +129,21 @@ def _apply_basic_fx(input_path: str, output_path: str, rate_factor: float, pitch
     if abs(rate_factor - 1.0) >= 0.02:
         filters.append(f"atempo={max(0.5, min(2.0, rate_factor)):.2f}")
 
-    cmd = ["ffmpeg", "-y", "-i", input_path, "-filter:a", ",".join(filters) or "anull", "-b:a", "192k", output_path]
-    res = subprocess.run(cmd, capture_output=True)
-    if res.returncode == 0 and os.path.exists(output_path) and os.path.getsize(output_path) > 500:
-        return True
-    if input_path != output_path:
-        shutil.copyfile(input_path, output_path)
-    return False
+    with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as tmp_f:
+        tmp_target = tmp_f.name
+
+    try:
+        cmd = ["ffmpeg", "-y", "-i", input_path, "-filter:a", ",".join(filters) or "anull", "-b:a", "192k", tmp_target]
+        res = subprocess.run(cmd, capture_output=True)
+        if res.returncode == 0 and os.path.exists(tmp_target) and os.path.getsize(tmp_target) > 500:
+            shutil.copyfile(tmp_target, output_path)
+            return True
+        if input_path != output_path:
+            shutil.copyfile(input_path, output_path)
+        return False
+    finally:
+        if os.path.exists(tmp_target):
+            try:
+                os.remove(tmp_target)
+            except Exception:
+                pass

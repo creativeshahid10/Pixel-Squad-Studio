@@ -106,7 +106,9 @@ def master_audio_file(
     if out_dir:
         os.makedirs(out_dir, exist_ok=True)
 
-    with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as tmp_file:
+    is_wav = str(output_path).lower().endswith(".wav")
+    suffix = ".wav" if is_wav else ".mp3"
+    with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp_file:
         tmp_output = tmp_file.name
 
     try:
@@ -114,11 +116,23 @@ def master_audio_file(
             "ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
             "-i", str(input_path),
             "-af", filtergraph,
-            "-codec:a", "libmp3lame",
-            "-b:a", str(bitrate),
-            "-ar", str(sample_rate),
-            str(tmp_output),
         ]
+        if is_wav:
+            cmd.extend([
+                "-codec:a", "pcm_s24le",
+                "-ar", str(sample_rate),
+                "-ac", "2",
+            ])
+        else:
+            cmd.extend([
+                "-codec:a", "libmp3lame",
+                "-b:a", str(bitrate),
+                "-ar", str(sample_rate),
+                "-ac", "2",
+                "-id3v2_version", "3",
+                "-write_xing", "0",
+            ])
+        cmd.append(str(tmp_output))
         res = subprocess.run(cmd, capture_output=True, timeout=120)
         if res.returncode == 0 and os.path.exists(tmp_output) and os.path.getsize(tmp_output) > 500:
             shutil.move(tmp_output, output_path)

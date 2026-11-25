@@ -51,7 +51,6 @@ const durationSlider = document.getElementById('durationSlider');
 const durationValLabel = document.getElementById('durationValLabel');
 const bpmInput = document.getElementById('bpmInput');
 const keyInput = document.getElementById('keyInput');
-const customModeToggle = document.getElementById('customModeToggle');
 const lyricsSection = document.getElementById('lyricsSection');
 const simpleModeSection = document.getElementById('simpleModeSection');
 const createBtn = document.getElementById('createBtn');
@@ -389,9 +388,14 @@ function renderTracks() {
             <i data-lucide="wand-2" class="w-4 h-4"></i>
           </button>
 
-          <!-- Download Audio -->
-          <a href="${track.audio_url}" download="${encodeURIComponent(track.title)}.mp3" class="p-2 rounded-lg hover:bg-white/10 text-slate-400 hover:text-emerald-400 transition" title="Download MP3">
+          <!-- Download MP3 (Premiere Pro Ready) -->
+          <a href="/api/tracks/${track.id}/download-mp3" class="p-2 rounded-lg hover:bg-emerald-500/15 text-slate-400 hover:text-emerald-400 transition" title="Download MP3 (Premiere Pro Compatible)">
             <i data-lucide="download" class="w-4 h-4"></i>
+          </a>
+
+          <!-- Download Lossless WAV (Premiere Pro / DAW) -->
+          <a href="/api/tracks/${track.id}/download-wav" class="p-2 rounded-lg hover:bg-indigo-500/15 text-slate-400 hover:text-indigo-300 transition" title="Download Lossless WAV (Premiere Pro / DAW)">
+            <i data-lucide="disc" class="w-4 h-4"></i>
           </a>
 
           <!-- Delete -->
@@ -525,27 +529,33 @@ function selectModel(modelId, label) {
 
   // Adjust engine tuning based on selected model
   const stepsSlider = document.getElementById('stepsSlider');
-  const stepsVal = document.getElementById('stepsVal');
   const cfgSlider = document.getElementById('cfgSlider');
-  const cfgVal = document.getElementById('cfgVal');
   const shiftSlider = document.getElementById('shiftSlider');
-  const shiftVal = document.getElementById('shiftVal');
 
   if (modelId === 'v6-pro') {
     // v6 Pro: Studio Master Quality (8 turbo steps, 7.8 CFG)
-    if (stepsSlider) { stepsSlider.value = 8; if (stepsVal) stepsVal.textContent = 8; const lbl = document.getElementById('stepsValLabel'); if (lbl) lbl.textContent = 8; }
-    if (cfgSlider) { cfgSlider.value = 7.8; if (cfgVal) cfgVal.textContent = '7.8'; const lbl = document.getElementById('cfgValLabel'); if (lbl) lbl.textContent = '7.8'; }
-    if (shiftSlider) { shiftSlider.value = 3.0; if (shiftVal) shiftVal.textContent = '3.0'; const lbl = document.getElementById('shiftValLabel'); if (lbl) lbl.textContent = '3.0'; }
+    if (stepsSlider) stepsSlider.value = 8;
+    const sLbl = document.getElementById('stepsValLabel'); if (sLbl) sLbl.textContent = 8;
+    if (cfgSlider) cfgSlider.value = 7.8;
+    const cLbl = document.getElementById('cfgValLabel'); if (cLbl) cLbl.textContent = '7.8';
+    if (shiftSlider) shiftSlider.value = 3.0;
+    const shLbl = document.getElementById('shiftValLabel'); if (shLbl) shLbl.textContent = '3.0';
   } else if (modelId === 'v6-wild') {
     // v6-wild Pro: Experimental ideas & wild styles (6 steps, 6.5 CFG, 4.5 timestep shift)
-    if (stepsSlider) { stepsSlider.value = 6; if (stepsVal) stepsVal.textContent = 6; const lbl = document.getElementById('stepsValLabel'); if (lbl) lbl.textContent = 6; }
-    if (cfgSlider) { cfgSlider.value = 6.5; if (cfgVal) cfgVal.textContent = '6.5'; const lbl = document.getElementById('cfgValLabel'); if (lbl) lbl.textContent = '6.5'; }
-    if (shiftSlider) { shiftSlider.value = 4.5; if (shiftVal) shiftVal.textContent = '4.5'; const lbl = document.getElementById('shiftValLabel'); if (lbl) lbl.textContent = '4.5'; }
+    if (stepsSlider) stepsSlider.value = 6;
+    const sLbl = document.getElementById('stepsValLabel'); if (sLbl) sLbl.textContent = 6;
+    if (cfgSlider) cfgSlider.value = 6.5;
+    const cLbl = document.getElementById('cfgValLabel'); if (cLbl) cLbl.textContent = '6.5';
+    if (shiftSlider) shiftSlider.value = 4.5;
+    const shLbl = document.getElementById('shiftValLabel'); if (shLbl) shLbl.textContent = '4.5';
   } else {
     // v6-mini: Fast, ultra-responsive ACE-Step Turbo (4 steps, 7.0 CFG)
-    if (stepsSlider) { stepsSlider.value = 4; if (stepsVal) stepsVal.textContent = 4; const lbl = document.getElementById('stepsValLabel'); if (lbl) lbl.textContent = 4; }
-    if (cfgSlider) { cfgSlider.value = 7.0; if (cfgVal) cfgVal.textContent = '7.0'; const lbl = document.getElementById('cfgValLabel'); if (lbl) lbl.textContent = '7.0'; }
-    if (shiftSlider) { shiftSlider.value = 3.0; if (shiftVal) shiftVal.textContent = '3.0'; const lbl = document.getElementById('shiftValLabel'); if (lbl) lbl.textContent = '3.0'; }
+    if (stepsSlider) stepsSlider.value = 4;
+    const sLbl = document.getElementById('stepsValLabel'); if (sLbl) sLbl.textContent = 4;
+    if (cfgSlider) cfgSlider.value = 7.0;
+    const cLbl = document.getElementById('cfgValLabel'); if (cLbl) cLbl.textContent = '7.0';
+    if (shiftSlider) shiftSlider.value = 3.0;
+    const shLbl = document.getElementById('shiftValLabel'); if (shLbl) shLbl.textContent = '3.0';
   }
 
   // Close dropdown
@@ -1496,12 +1506,14 @@ function seekAudio(e) {
 function downloadCurrentTrack() {
   if (activeTrackIndex >= 0 && currentTracks[activeTrackIndex]) {
     const track = currentTracks[activeTrackIndex];
-    const a = document.createElement('a');
-    a.href = track.audio_url;
-    a.download = `${track.title || 'ACE_Song'}.mp3`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    window.location.href = `/api/tracks/${track.id}/download-mp3`;
+  }
+}
+
+function downloadCurrentTrackWav() {
+  if (activeTrackIndex >= 0 && currentTracks[activeTrackIndex]) {
+    const track = currentTracks[activeTrackIndex];
+    window.location.href = `/api/tracks/${track.id}/download-wav`;
   }
 }
 
