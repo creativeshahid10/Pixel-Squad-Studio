@@ -1492,7 +1492,6 @@ async def download_track_mp3(track_id: str):
         target_mp3,
         media_type="audio/mpeg",
         filename=filename,
-        headers={"Content-Disposition": f'attachment; filename="{filename}"'}
     )
 
 
@@ -1537,7 +1536,6 @@ async def download_track_wav(track_id: str):
         target_wav,
         media_type="audio/wav",
         filename=filename,
-        headers={"Content-Disposition": f'attachment; filename="{filename}"'}
     )
 
 
